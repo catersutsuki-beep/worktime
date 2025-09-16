@@ -120,7 +120,7 @@
     min-height:74px; border:1px solid var(--border); border-radius:10px; padding:6px; position:relative; background:var(--card);
     display:flex; flex-direction:column; gap:4px;
   }
-  .cal-cell .d{font-size:12px; color:var(--muted')}
+  .cal-cell .d{font-size:12px; color:var(--muted)}
   .cal-cell .amt{margin-top:auto; font-size:12px; color:var(--accent); font-weight:600}
   .cal-cell .hrs{font-size:11px; color:var(--muted)}
   .cal-cell.today{outline:2px solid var(--primary)}
@@ -308,82 +308,23 @@
 </div>
 
 <script>
-/* ------------------------- 数据层（IndexedDB 版本 + 旧数据迁移） ------------------------- */
-const DB_NAME = "worktime-db";
-const STORE_NAME = "worktime-store";
-const KEY = "state";
-
-function openDB() {
-  return new Promise((resolve, reject) => {
-    const req = indexedDB.open(DB_NAME, 1);
-    req.onupgradeneeded = (e) => {
-      const db = e.target.result;
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        db.createObjectStore(STORE_NAME);
-      }
-    };
-    req.onsuccess = (e) => resolve(e.target.result);
-    req.onerror = (e) => reject(e.target.error);
-  });
-}
-
-async function idbGet(key) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readonly");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.get(key);
-    req.onsuccess = () => resolve(req.result);
-    req.onerror = (e) => reject(e.target.error);
-  });
-}
-
-async function idbSet(key, value) {
-  const db = await openDB();
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(STORE_NAME, "readwrite");
-    const store = tx.objectStore(STORE_NAME);
-    const req = store.put(value, key);
-    req.onsuccess = () => resolve(true);
-    req.onerror = (e) => reject(e.target.error);
-  });
-}
-
+/* ------------------------- 简易数据层（localStorage） ------------------------- */
 const db = {
-  async load() {
-    try {
-      // 先尝试从 IndexedDB 读取
-      const raw = await idbGet(KEY);
-      if (raw) return raw;
-
-      // 若没有，做一次性迁移：把旧 localStorage 的 worklog-db 导入（若存在）
-      try {
-        const legacy = localStorage.getItem('worklog-db');
-        if (legacy) {
-          const parsed = JSON.parse(legacy);
-          await idbSet(KEY, parsed);
-          // 可保留旧数据以便回退；若你想清除旧数据可解除注释：
-          // localStorage.removeItem('worklog-db');
-          return parsed;
-        }
-      } catch(_) {}
-
-      return {shifts: [], rates: [], theme: "system"};
-    } catch (e) {
-      console.error("IndexedDB load error:", e);
-      return {shifts: [], rates: [], theme: "system"};
-    }
+  load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem('worklog-db')||'{}');
+      return {
+        shifts: raw.shifts||[], // {id,date:'YYYY-MM-DD',start:'HH:mm',end:'HH:mm',note}
+        rates: raw.rates||[],   // {id,start:'HH:mm',end:'HH:mm',pay:number}
+        theme: raw.theme || 'system'
+      }
+    }catch(e){ return {shifts:[],rates:[],theme:'system'} }
   },
-  async save(state) {
-    try {
-      await idbSet(KEY, state);
-    } catch (e) {
-      console.error("IndexedDB save error:", e);
-    }
+  save(state){
+    localStorage.setItem('worklog-db', JSON.stringify(state));
   }
-};
-
-let state = {shifts: [], rates: [], theme: "system"};
+}
+let state = db.load();
 
 /* ------------------------- 工具函数 ------------------------- */
 const $ = s => document.querySelector(s);
@@ -393,36 +334,49 @@ function todayStr(){
   const d = new Date();
   return d.toISOString().slice(0,10);
 }
-function parseHM(hm){ const [h,m] = hm.split(':').map(Number); return h*60 + m; }
-function minToHM(min){ const h = Math.floor(min/60), m = min%60; return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`; }
+function parseHM(hm){ // 'HH:mm' -> minutes from 0:00
+  const [h,m] = hm.split(':').map(Number);
+  return h*60 + m;
+}
+function minToHM(min){
+  const h = Math.floor(min/60), m = min%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
 function uid(){ return Math.random().toString(36).slice(2,9); }
-function getWeekKey(isoDate){
+
+function sameDay(a,b){ return a===b; }
+function getWeekKey(isoDate){ // YYYY-Www (Mon-based)
   const d = new Date(isoDate+'T00:00:00');
-  const day = (d.getUTCDay()+6)%7;
+  // set to Thursday of current week to get ISO week
+  const day = (d.getUTCDay()+6)%7; // Mon=0..Sun=6
   d.setUTCDate(d.getUTCDate()-day+3);
   const firstThu = new Date(Date.UTC(d.getUTCFullYear(),0,4));
   const wk = 1 + Math.round((d - firstThu)/(7*24*3600*1000));
   return `${d.getUTCFullYear()}-W${String(wk).padStart(2,'0')}`;
 }
 
-/* ------------------------- 工资计算 ------------------------- */
+/* ------------------------- 工资计算（按时薪规则拆分） ------------------------- */
+/* 约束：仅处理同一自然日内的时间段；跨午夜请拆分成两条 */
 function calcPayForShift(shift, rates){
   const s = parseHM(shift.start), e = parseHM(shift.end);
   if(e<=s) return {minutes:0, pay:0, parts:[]};
-  let totalPay = 0;
+  let totalMin = 0, totalPay = 0;
   const parts = [];
   for(const r of rates){
     const rs = parseHM(r.start), re = parseHM(r.end);
-    if(re<=rs) continue;
+    if(re<=rs) continue; // 不支持跨日规则
     const ss = Math.max(s, rs);
     const ee = Math.min(e, re);
     if(ee>ss){
       const mins = ee-ss;
       const pay = (mins/60)*Number(r.pay||0);
+      totalMin += mins;
       totalPay += pay;
       parts.push({range:`${minToHM(ss)}-${minToHM(ee)}`, mins, pay, rate:r});
     }
   }
+  // 若有未覆盖的时间段，视为 $0
+  totalMin = Math.max(totalMin, e-s); // 统计工时按原区间
   return {minutes: (e-s), pay: totalPay, parts};
 }
 
@@ -442,7 +396,7 @@ function calcDay(dateStr){
 /* ------------------------- 渲染：首页 ------------------------- */
 function renderHome(){
   const d = $('#date').value || todayStr();
-  const {minutes, pay} = calcDay(d);
+  const {minutes, pay, details, count} = calcDay(d);
   $('#todayHours').textContent = (Math.round(minutes/6)/10).toFixed(1) + ' h';
   $('#todayPay').textContent = fmtMoney(pay);
 
@@ -482,12 +436,14 @@ function renderHome(){
     list.appendChild(row);
   });
 
+  // 顶部合计
   const td = calcDay(todayStr());
   $('#todaySum').textContent = `今天 ${ (td.minutes/60).toFixed(1) }h · ${ fmtMoney(td.pay) }`;
 }
 
 /* ------------------------- 渲染：日历 ------------------------- */
-function buildCalendar(y,m){
+function buildCalendar(y,m){ // m: 0-11
+  // 周标题
   const wd = ['一','二','三','四','五','六','日'];
   const wdWrap = $('#calWeekdays');
   wdWrap.innerHTML='';
@@ -499,9 +455,10 @@ function buildCalendar(y,m){
   grid.innerHTML='';
   const first = new Date(Date.UTC(y,m,1));
   const last = new Date(Date.UTC(y,m+1,0));
-  let startOffset = (first.getUTCDay()+6)%7;
+  let startOffset = (first.getUTCDay()+6)%7; // Mon first
   const days = last.getUTCDate();
 
+  // 前置空格显示上月
   const prevLast = new Date(Date.UTC(y,m,0)).getUTCDate();
   for(let i=0;i<startOffset;i++){
     const n = document.createElement('div'); n.className='cal-cell out card';
@@ -518,7 +475,7 @@ function buildCalendar(y,m){
     cell.innerHTML = `<div class="d">${d}</div>
       <div class="hrs">${ minutes? (minutes/60).toFixed(1)+' h':''}</div>
       <div class="amt">${ pay? fmtMoney(pay): ''}</div>`;
-    cell.onclick=()=>{
+    cell.onclick=()=>{ // 跳回首页选中该日
       $('#date').value = ds;
       switchView('v-home');
       renderHome();
@@ -526,6 +483,7 @@ function buildCalendar(y,m){
     grid.appendChild(cell);
   }
 
+  // 后置填充
   const totalCells = startOffset + days;
   const tail = (7 - (totalCells % 7)) % 7;
   for(let i=0;i<tail;i++){
@@ -569,8 +527,9 @@ function renderCalendar(){
   }
 }
 
-/* ------------------------- 统计 ------------------------- */
+/* ------------------------- 渲染：统计（简易原生画布） ------------------------- */
 function weekBuckets(n=12){
+  // 获取过去 n 周（含本周），汇总小时与工资
   const map = new Map();
   state.shifts.forEach(sh=>{
     const wk = getWeekKey(sh.date);
@@ -580,6 +539,7 @@ function weekBuckets(n=12){
     map.get(wk).pay += r.pay;
     map.get(wk).count += 1;
   });
+  // 取最近 n 周按时间排序
   const keys = [...map.keys()].sort();
   const lastN = keys.slice(-n);
   return lastN.map(k=>({week:k, hours: (map.get(k).minutes/60), pay: map.get(k).pay, count: map.get(k).count}));
@@ -590,13 +550,16 @@ function drawBarLineChart(){
   const ctx = c.getContext('2d');
   const data = weekBuckets(12);
   ctx.clearRect(0,0,c.width,c.height);
+  // 坐标
   const pad = {l:50,r:50,t:20,b:40};
   const w = c.width - pad.l - pad.r;
   const h = c.height - pad.t - pad.b;
 
+  // 轴范围
   const maxH = Math.max(1, Math.ceil(Math.max(...data.map(d=>d.hours),0)));
   const maxP = Math.max(1, Math.ceil(Math.max(...data.map(d=>d.pay),0)));
 
+  // y 轴刻度（左：小时，右：工资）
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
   ctx.font = "12px system-ui";
   ctx.textAlign="right";
@@ -614,6 +577,7 @@ function drawBarLineChart(){
     ctx.fillText('$'+v.toFixed(0), pad.l+w+6, y+4);
   }
 
+  // x 轴标签
   ctx.textAlign='center';
   data.forEach((d,i)=>{
     const x = pad.l + (i+0.5)*w/data.length;
@@ -621,6 +585,7 @@ function drawBarLineChart(){
     ctx.fillText(d.week.slice(5), x, pad.t+h+18);
   });
 
+  // 柱（小时）
   const barW = w/data.length*0.6;
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary');
   data.forEach((d,i)=>{
@@ -629,6 +594,7 @@ function drawBarLineChart(){
     ctx.fillRect(x, y, barW, (d.hours/maxH)*h);
   });
 
+  // 线（工资）
   ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
   ctx.lineWidth = 2;
   ctx.beginPath();
@@ -639,6 +605,7 @@ function drawBarLineChart(){
   });
   ctx.stroke();
 
+  // 点
   ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
   data.forEach((d,i)=>{
     const x = pad.l + (i+0.5)*w/data.length;
@@ -650,22 +617,25 @@ function drawBarLineChart(){
 function drawHeatmap(){
   const grid = $('#heatGrid');
   grid.innerHTML='';
-  const weeks = weekBuckets(12);
-  const countsByDay = {};
+  // 12周 × 7天（周一到周日），第1列显示周序标签
+  const weeks = weekBuckets(12); // 顺序已按时间
+  const countsByDay = {}; // key: week + '_' + dow(1..7)
   state.shifts.forEach(sh=>{
     const wk = getWeekKey(sh.date);
     const d = new Date(sh.date+'T00:00:00');
-    let dow = (d.getUTCDay()+6)%7 + 1;
+    let dow = (d.getUTCDay()+6)%7 + 1; // 1..7
     const key = wk+'_'+dow;
     countsByDay[key] = (countsByDay[key]||0) + 1;
   });
 
+  // 顶部空白
   const topBlank = document.createElement('div'); topBlank.className='muted'; topBlank.style.textAlign='center'; topBlank.textContent='';
   grid.appendChild(topBlank);
   for(let k=0;k<12;k++){
     const label = document.createElement('div'); label.className='muted'; label.style.textAlign='center'; label.textContent = weeks[k]?.week.slice(5) || '';
     grid.appendChild(label);
   }
+  // 7 行：周一到周日
   const names = ['周一','周二','周三','周四','周五','周六','周日'];
   for(let dow=1; dow<=7; dow++){
     const rowLabel = document.createElement('div'); rowLabel.className='muted'; rowLabel.style.fontSize='12px'; rowLabel.textContent = names[dow-1];
@@ -683,7 +653,7 @@ function drawHeatmap(){
   }
 }
 
-/* ------------------------- 设置（时薪规则） ------------------------- */
+/* ------------------------- 渲染：设置（时薪规则） ------------------------- */
 function renderRates(){
   const list = $('#rateList');
   list.innerHTML='';
@@ -705,7 +675,7 @@ function renderRates(){
     });
 }
 
-/* ------------------------- 事件与全局刷新 ------------------------- */
+/* ------------------------- 事件绑定 ------------------------- */
 function persist(){ db.save(state); }
 function refreshAll(){
   renderHome();
@@ -718,7 +688,9 @@ function refreshAll(){
 }
 
 function initDefaults(){
+  // 默认当天
   $('#date').value = todayStr();
+  // 如果没有任何时薪规则，给两条示例
   if(state.rates.length===0){
     state.rates = [
       {id:uid(), start:'09:00', end:'18:00', pay:30},
@@ -728,12 +700,13 @@ function initDefaults(){
 }
 
 function bind(){
+  // 底部导航
   $$('.tab').forEach(t=>t.addEventListener('click', ()=>{
     $$('.tab').forEach(x=>x.classList.remove('active'));
     t.classList.add('active');
     switchView(t.dataset.to);
   }));
-
+  // 添加班次
   $('#addShiftBtn').onclick=()=>{
     const date = $('#date').value;
     const start = $('#start').value;
@@ -743,7 +716,7 @@ function bind(){
     state.shifts.push({id:uid(), date, start, end, note:$('#note').value.trim()});
     persist(); $('#note').value=''; refreshAll();
   };
-
+  // 清除当日
   $('#clearTodayBtn').onclick=()=>{
     const d = $('#date').value || todayStr();
     if(confirm(`删除 ${d} 的所有上班记录？`)){
@@ -751,7 +724,7 @@ function bind(){
       persist(); refreshAll();
     }
   };
-
+  // 设置：添加时薪
   $('#addRateBtn').onclick=()=>{
     const s = $('#rateStart').value, e = $('#rateEnd').value, p = Number($('#ratePay').value);
     if(!s||!e||!(p>=0)) return alert('请填写完整规则与正确的时薪');
@@ -768,6 +741,7 @@ function bind(){
     persist(); renderRates(); refreshAll();
   };
 
+  // 导入导出
   $('#exportBtn').onclick=()=>{
     const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
     const url = URL.createObjectURL(blob);
@@ -805,11 +779,13 @@ function bind(){
     }
   };
 
+  // 主题
   $('#themeSel').value = state.theme || 'system';
   $('#themeSel').onchange = (e)=>{
     state.theme = e.target.value; applyTheme(state.theme); persist();
   };
 
+  // 日历初始化
   renderCalendar();
 }
 
@@ -824,36 +800,24 @@ function applyTheme(mode){
   root.removeAttribute('data-theme');
   if(mode==='light') root.setAttribute('data-theme','light');
   if(mode==='dark') root.setAttribute('data-theme','dark');
+  // system -> 不设置 data-theme，跟随系统
 }
 
-/* ------------------------- 启动（异步） ------------------------- */
-(async () => {
-  // 注册 Service Worker（配合 sw.js 缓存页面与图标）
-  if ('serviceWorker' in navigator) {
-    try { await navigator.serviceWorker.register('sw.js'); } catch(_) {}
-  }
+/* ------------------------- 启动 ------------------------- */
+initDefaults();
+bind();
+renderRates();
+applyTheme(state.theme||'system');
+renderHome();
+drawBarLineChart();
+drawHeatmap();
 
-  // 从 IndexedDB 载入或迁移数据后启动
-  state = await db.load();
-  initDefaults();
-  bind();
-  renderRates();
-  applyTheme(state.theme||'system');
-  renderHome();
-  drawBarLineChart();
-  drawHeatmap();
-
-  // 初次进入把日历定位到当月（用于 renderCalendar 的默认月份记忆）
-  (function initCalPos(){
-    const now = new Date();
-    localStorage.setItem('calY', now.getFullYear());
-    localStorage.setItem('calM', now.getMonth());
-  })();
+/* 初次进入把日历定位到当月 */
+(function initCalPos(){
+  const now = new Date();
+  localStorage.setItem('calY', now.getFullYear());
+  localStorage.setItem('calM', now.getMonth());
 })();
 </script>
 </body>
 </html>
-
-</body>
-</html>
-
