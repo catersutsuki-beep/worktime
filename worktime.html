@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>我的上班记录</title>
+<style>
+  :root{
+    --bg: #ffffff;
+    --card: #f6f7f9;
+    --border: #e6e8eb;
+    --text: #111418;
+    --muted: #6b7280;
+    --primary: #2563eb;
+    --accent: #10b981;
+    --danger: #ef4444;
+    --shadow: 0 6px 24px rgba(0,0,0,.08);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg: #0b0d10;
+      --card: #12161b;
+      --border: #1f242b;
+      --text: #e5e7eb;
+      --muted: #9aa3af;
+      --primary: #60a5fa;
+      --accent: #34d399;
+      --danger: #f87171;
+      --shadow: 0 8px 28px rgba(0,0,0,.35);
+    }
+  }
+  [data-theme="light"]{
+    --bg:#ffffff;--card:#f6f7f9;--border:#e6e8eb;--text:#111418;--muted:#6b7280;--primary:#2563eb;--accent:#10b981;--danger:#ef4444;--shadow:0 6px 24px rgba(0,0,0,.08);
+  }
+  [data-theme="dark"]{
+    --bg:#0b0d10;--card:#12161b;--border:#1f242b;--text:#e5e7eb;--muted:#9aa3af;--primary:#60a5fa;--accent:#34d399;--danger:#f87171;--shadow:0 8px 28px rgba(0,0,0,.35);
+  }
+
+  html,body{height:100%}
+  body{
+    margin:0;
+    font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, "PingFang SC", "Helvetica Neue", Arial, "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
+    background:var(--bg);
+    color:var(--text);
+  }
+  .app{
+    max-width:920px;
+    margin:0 auto;
+    padding-bottom:86px; /* bottom nav space */
+  }
+  header{
+    position:sticky; top:0; z-index:3;
+    background:var(--bg);
+    border-bottom:1px solid var(--border);
+    backdrop-filter:saturate(160%) blur(6px);
+  }
+  header .bar{
+    display:flex; align-items:center; gap:12px;
+    padding:14px 16px;
+  }
+  header h1{font-size:18px; margin:0; font-weight:700}
+  header .sub{color:var(--muted); font-size:13px}
+
+  .view{display:none; padding:16px}
+  .view.active{display:block}
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    box-shadow:var(--shadow);
+  }
+
+  .home-form{padding:16px}
+  .grid{display:grid; gap:12px}
+  .g2{grid-template-columns:1fr 1fr}
+  .g3{grid-template-columns:repeat(3,1fr)}
+  label{font-size:13px; color:var(--muted)}
+  input,select,button,textarea{
+    font:inherit; color:var(--text);
+  }
+  input[type="date"],input[type="time"],input[type="text"],input[type="number"],select,textarea{
+    width:100%; box-sizing:border-box; padding:12px 12px;
+    border-radius:10px; border:1px solid var(--border); background:transparent;
+    outline:none;
+  }
+  input::placeholder,textarea::placeholder{color:var(--muted)}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center;
+    gap:8px; padding:12px 14px; border-radius:12px; border:1px solid var(--border); background:var(--primary); color:#fff; cursor:pointer; text-decoration:none;
+  }
+  .btn.ghost{background:transparent; color:var(--text)}
+  .btn.danger{background:var(--danger); border-color:transparent}
+  .btn.flat{background:transparent; border-color:var(--border); color:var(--text)}
+  .btn:disabled{opacity:.5; cursor:not-allowed}
+
+  .hint{color:var(--muted); font-size:14px}
+  .hint.big{font-size:16px; opacity:.65}
+  .muted{color:var(--muted)}
+
+  .list{padding:12px}
+  .row{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:12px 8px; border-bottom:1px dashed var(--border);
+  }
+  .row:last-child{border-bottom:0}
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; padding:4px 8px;
+    border-radius:999px; border:1px solid var(--border); background:rgba(0,0,0,.03);
+  }
+
+  /* Calendar */
+  .cal-header{display:flex; align-items:center; justify-content:space-between; padding:12px 16px}
+  .cal-grid{
+    display:grid; gap:6px; padding:10px 12px 16px 12px;
+    grid-template-columns: repeat(7,1fr);
+  }
+  .cal-weekday{font-size:12px; color:var(--muted); text-align:center}
+  .cal-cell{
+    min-height:74px; border:1px solid var(--border); border-radius:10px; padding:6px; position:relative; background:var(--card);
+    display:flex; flex-direction:column; gap:4px;
+  }
+  .cal-cell .d{font-size:12px; color:var(--muted)}
+  .cal-cell .amt{margin-top:auto; font-size:12px; color:var(--accent); font-weight:600}
+  .cal-cell .hrs{font-size:11px; color:var(--muted)}
+  .cal-cell.today{outline:2px solid var(--primary)}
+  .cal-cell.out{opacity:.4}
+
+  /* Charts */
+  .canvas-wrap{padding:16px}
+  canvas{width:100%; height:280px; display:block}
+
+  /* Heatmap */
+  .hm-wrap{padding:16px}
+  .hm-grid{display:grid; grid-template-columns:repeat(13,1fr); gap:4px}
+  .hm-cell{
+    aspect-ratio:1/1; border-radius:4px; background:#e5e7eb; position:relative;
+  }
+  [data-theme="dark"] .hm-cell{background:#1f2937}
+  .hm-cell[data-v="1"]{background:#d1fae5}
+  .hm-cell[data-v="2"]{background:#a7f3d0}
+  .hm-cell[data-v="3"]{background:#6ee7b7}
+  .hm-cell[data-v="4"]{background:#34d399}
+  .hm-cell[data-v="5"]{background:#10b981}
+  .hm-cell[data-v="6"]{background:#059669}
+  .hm-meta{display:flex; justify-content:space-between; color:var(--muted); font-size:12px; margin-top:8px}
+
+  /* Bottom nav */
+  .tabbar{
+    position:fixed; left:0; right:0; bottom:0; z-index:4; background:var(--bg); border-top:1px solid var(--border);
+    padding:8px env(safe-area-inset-right) 8px env(safe-area-inset-left);
+  }
+  .tabs{
+    max-width:920px; margin:0 auto; display:grid; grid-template-columns:repeat(4,1fr); gap:8px;
+  }
+  .tab{
+    display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px;
+    padding:8px 6px; border-radius:12px; border:1px solid transparent; color:var(--muted); text-decoration:none; cursor:pointer;
+  }
+  .tab.active{border-color:var(--border); color:var(--text); background:var(--card)}
+  .tab .ico{font-size:18px; line-height:1}
+  .tab .txt{font-size:12px}
+  .foot-space{height:80px}
+
+  /* Small helpers */
+  .flex{display:flex; gap:8px; align-items:center}
+  .right{margin-left:auto}
+  .sep{height:1px; background:var(--border); margin:8px 0}
+  .title{padding:14px 16px; font-weight:700}
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <header>
+    <div class="bar">
+      <h1>上班记录</h1>
+      <div class="sub" id="todaySum"></div>
+      <div class="right flex">
+        <span class="chip"><span>主题</span>
+          <select id="themeSel" aria-label="主题">
+            <option value="system">跟随系统</option>
+            <option value="light">浅色</option>
+            <option value="dark">深色</option>
+          </select>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- HOME -->
+  <section class="view active" id="v-home">
+    <div class="card home-form">
+      <div class="grid g3">
+        <div>
+          <label>日期</label>
+          <input type="date" id="date" />
+        </div>
+        <div>
+          <label>开始时间</label>
+          <input type="time" id="start" step="300" />
+        </div>
+        <div>
+          <label>结束时间</label>
+          <input type="time" id="end" step="300" />
+        </div>
+      </div>
+      <div class="grid" style="margin-top:12px">
+        <input type="text" id="note" placeholder="备注（可空）" />
+        <div class="flex">
+          <button class="btn" id="addShiftBtn">添加时间段</button>
+          <button class="btn flat" id="clearTodayBtn" title="仅清除选定日期的记录">清除当日</button>
+          <span class="right hint">提示：时薪在“设置”页按时间段定义，工资将自动按规则拆分计算。</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="title">今天</div>
+    <div class="card">
+      <div class="list" id="todayList">
+        <div class="hint big" id="homeHint" style="padding:8px 4px; opacity:.7">今天的工作计划是？</div>
+      </div>
+      <div class="sep"></div>
+      <div class="flex" style="padding:12px">
+        <div class="muted">当日工时</div>
+        <div class="right" id="todayHours">0 h</div>
+      </div>
+      <div class="flex" style="padding:0 12px 12px 12px">
+        <div class="muted">当日工资</div>
+        <div class="right" id="todayPay">$0.00</div>
+      </div>
+    </div>
+    <div class="foot-space"></div>
+  </section>
+
+  <!-- CALENDAR -->
+  <section class="view" id="v-cal">
+    <div class="card">
+      <div class="cal-header">
+        <button class="btn flat" id="prevMon">‹ 上月</button>
+        <div class="flex">
+          <select id="calYear"></select>
+          <select id="calMon"></select>
+        </div>
+        <button class="btn flat" id="nextMon">下月 ›</button>
+      </div>
+      <div class="cal-grid" id="calWeekdays"></div>
+      <div class="cal-grid" id="calGrid"></div>
+    </div>
+    <div class="foot-space"></div>
+  </section>
+
+  <!-- STATS -->
+  <section class="view" id="v-stats">
+    <div class="card canvas-wrap">
+      <div class="hint">每周总览（近 12 周）</div>
+      <canvas id="barChart" width="800" height="320" aria-label="每周工时与工资"></canvas>
+      <div class="hint" style="margin-top:6px">柱：工时（小时）；折线：工资（$）</div>
+    </div>
+
+    <div class="card hm-wrap" style="margin-top:16px">
+      <div class="hint">上班次数热力图（近 12 周 × 周一–周日）</div>
+      <div class="hm-grid" id="heatGrid"></div>
+      <div class="hm-meta"><span class="muted">少</span><span class="muted">多</span></div>
+    </div>
+    <div class="foot-space"></div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="view" id="v-settings">
+    <div class="card" style="padding:16px">
+      <div class="hint" style="margin-bottom:8px">时薪规则（按每日时间段）</div>
+      <div class="grid g3">
+        <div><label>开始</label><input type="time" id="rateStart" value="09:00" step="300"></div>
+        <div><label>结束</label><input type="time" id="rateEnd" value="18:00" step="300"></div>
+        <div><label>时薪（$/h）</label><input type="number" id="ratePay" step="0.01" min="0" value="30"></div>
+      </div>
+      <div class="flex" style="margin-top:12px">
+        <button class="btn" id="addRateBtn">添加时薪规则</button>
+        <button class="btn flat" id="resetRateBtn" title="恢复默认日间/晚间示例">恢复默认</button>
+        <span class="right hint">提示：规则按时间匹配，不支持跨午夜（可按天拆分录入）。</span>
+      </div>
+
+      <div class="sep"></div>
+      <div class="list" id="rateList"></div>
+    </div>
+
+    <div class="card" style="padding:16px; margin-top:16px">
+      <div class="hint" style="margin-bottom:8px">数据</div>
+      <div class="flex">
+        <button class="btn flat" id="exportBtn">导出 JSON</button>
+        <label class="btn flat" for="importFile">导入 JSON</label>
+        <input id="importFile" type="file" accept="application/json" style="display:none">
+        <button class="btn danger right" id="wipeBtn">清空全部数据</button>
+      </div>
+    </div>
+    <div class="foot-space"></div>
+  </section>
+
+  <!-- Bottom Nav -->
+  <nav class="tabbar">
+    <div class="tabs">
+      <a class="tab active" data-to="v-home"><span class="ico">🏠</span><span class="txt">首页</span></a>
+      <a class="tab" data-to="v-cal"><span class="ico">📅</span><span class="txt">日历</span></a>
+      <a class="tab" data-to="v-stats"><span class="ico">📊</span><span class="txt">统计</span></a>
+      <a class="tab" data-to="v-settings"><span class="ico">⚙️</span><span class="txt">设置</span></a>
+    </div>
+  </nav>
+</div>
+
+<script>
+/* ------------------------- 简易数据层（localStorage） ------------------------- */
+const db = {
+  load(){
+    try{
+      const raw = JSON.parse(localStorage.getItem('worklog-db')||'{}');
+      return {
+        shifts: raw.shifts||[], // {id,date:'YYYY-MM-DD',start:'HH:mm',end:'HH:mm',note}
+        rates: raw.rates||[],   // {id,start:'HH:mm',end:'HH:mm',pay:number}
+        theme: raw.theme || 'system'
+      }
+    }catch(e){ return {shifts:[],rates:[],theme:'system'} }
+  },
+  save(state){
+    localStorage.setItem('worklog-db', JSON.stringify(state));
+  }
+}
+let state = db.load();
+
+/* ------------------------- 工具函数 ------------------------- */
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const fmtMoney = v => '$' + (Math.round(v*100)/100).toFixed(2);
+function todayStr(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function parseHM(hm){ // 'HH:mm' -> minutes from 0:00
+  const [h,m] = hm.split(':').map(Number);
+  return h*60 + m;
+}
+function minToHM(min){
+  const h = Math.floor(min/60), m = min%60;
+  return `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+}
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+function sameDay(a,b){ return a===b; }
+function getWeekKey(isoDate){ // YYYY-Www (Mon-based)
+  const d = new Date(isoDate+'T00:00:00');
+  // set to Thursday of current week to get ISO week
+  const day = (d.getUTCDay()+6)%7; // Mon=0..Sun=6
+  d.setUTCDate(d.getUTCDate()-day+3);
+  const firstThu = new Date(Date.UTC(d.getUTCFullYear(),0,4));
+  const wk = 1 + Math.round((d - firstThu)/(7*24*3600*1000));
+  return `${d.getUTCFullYear()}-W${String(wk).padStart(2,'0')}`;
+}
+
+/* ------------------------- 工资计算（按时薪规则拆分） ------------------------- */
+/* 约束：仅处理同一自然日内的时间段；跨午夜请拆分成两条 */
+function calcPayForShift(shift, rates){
+  const s = parseHM(shift.start), e = parseHM(shift.end);
+  if(e<=s) return {minutes:0, pay:0, parts:[]};
+  let totalMin = 0, totalPay = 0;
+  const parts = [];
+  for(const r of rates){
+    const rs = parseHM(r.start), re = parseHM(r.end);
+    if(re<=rs) continue; // 不支持跨日规则
+    const ss = Math.max(s, rs);
+    const ee = Math.min(e, re);
+    if(ee>ss){
+      const mins = ee-ss;
+      const pay = (mins/60)*Number(r.pay||0);
+      totalMin += mins;
+      totalPay += pay;
+      parts.push({range:`${minToHM(ss)}-${minToHM(ee)}`, mins, pay, rate:r});
+    }
+  }
+  // 若有未覆盖的时间段，视为 $0
+  totalMin = Math.max(totalMin, e-s); // 统计工时按原区间
+  return {minutes: (e-s), pay: totalPay, parts};
+}
+
+function calcDay(dateStr){
+  const shifts = state.shifts.filter(x=>x.date===dateStr);
+  let mins=0, pay=0;
+  const details=[];
+  for(const sh of shifts){
+    const r = calcPayForShift(sh, state.rates);
+    mins += r.minutes;
+    pay += r.pay;
+    details.push({sh, ...r});
+  }
+  return {minutes:mins, pay, details, count:shifts.length};
+}
+
+/* ------------------------- 渲染：首页 ------------------------- */
+function renderHome(){
+  const d = $('#date').value || todayStr();
+  const {minutes, pay, details, count} = calcDay(d);
+  $('#todayHours').textContent = (Math.round(minutes/6)/10).toFixed(1) + ' h';
+  $('#todayPay').textContent = fmtMoney(pay);
+
+  const list = $('#todayList');
+  list.innerHTML = '';
+  const todays = state.shifts.filter(x=>x.date===d).sort((a,b)=>a.start.localeCompare(b.start));
+  if(todays.length===0){
+    const hint = document.createElement('div');
+    hint.className='hint big';
+    hint.style.padding='8px 4px';
+    hint.style.opacity='.7';
+    hint.textContent = '今天的工作计划是？';
+    hint.id = 'homeHint';
+    list.appendChild(hint);
+  }else{
+    const done = document.createElement('div');
+    done.className='hint big';
+    done.style.padding='8px 4px';
+    done.style.opacity='.7';
+    done.textContent = '今天上班也辛苦了！';
+    list.appendChild(done);
+  }
+  todays.forEach(sh=>{
+    const row = document.createElement('div');
+    row.className='row';
+    const left = document.createElement('div');
+    left.innerHTML = `<div><strong>${sh.start}–${sh.end}</strong> <span class="muted">${sh.note||''}</span></div>
+      <div class="muted" style="font-size:13px">${sh.date}</div>`;
+    const seg = calcPayForShift(sh, state.rates);
+    const right = document.createElement('div');
+    right.innerHTML = `<div class="right"><div style="text-align:right">${fmtMoney(seg.pay)}</div>
+      <div class="muted" style="text-align:right;font-size:12px">${(seg.minutes/60).toFixed(2)} h</div></div>`;
+    const del = document.createElement('button');
+    del.className='btn flat'; del.textContent='删除';
+    del.onclick=()=>{ state.shifts = state.shifts.filter(x=>x.id!==sh.id); persist(); refreshAll(); };
+    row.append(left, right, del);
+    list.appendChild(row);
+  });
+
+  // 顶部合计
+  const td = calcDay(todayStr());
+  $('#todaySum').textContent = `今天 ${ (td.minutes/60).toFixed(1) }h · ${ fmtMoney(td.pay) }`;
+}
+
+/* ------------------------- 渲染：日历 ------------------------- */
+function buildCalendar(y,m){ // m: 0-11
+  // 周标题
+  const wd = ['一','二','三','四','五','六','日'];
+  const wdWrap = $('#calWeekdays');
+  wdWrap.innerHTML='';
+  wd.forEach(w=>{
+    const d = document.createElement('div'); d.className='cal-weekday'; d.textContent='周'+w; wdWrap.appendChild(d);
+  });
+
+  const grid = $('#calGrid');
+  grid.innerHTML='';
+  const first = new Date(Date.UTC(y,m,1));
+  const last = new Date(Date.UTC(y,m+1,0));
+  let startOffset = (first.getUTCDay()+6)%7; // Mon first
+  const days = last.getUTCDate();
+
+  // 前置空格显示上月
+  const prevLast = new Date(Date.UTC(y,m,0)).getUTCDate();
+  for(let i=0;i<startOffset;i++){
+    const n = document.createElement('div'); n.className='cal-cell out card';
+    const dayNum = prevLast - startOffset + 1 + i;
+    n.innerHTML = `<div class="d">${dayNum}</div>`;
+    grid.appendChild(n);
+  }
+
+  for(let d=1; d<=days; d++){
+    const ds = `${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const {minutes, pay} = calcDay(ds);
+    const cell = document.createElement('div'); cell.className='cal-cell card';
+    if(ds===todayStr()) cell.classList.add('today');
+    cell.innerHTML = `<div class="d">${d}</div>
+      <div class="hrs">${ minutes? (minutes/60).toFixed(1)+' h':''}</div>
+      <div class="amt">${ pay? fmtMoney(pay): ''}</div>`;
+    cell.onclick=()=>{ // 跳回首页选中该日
+      $('#date').value = ds;
+      switchView('v-home');
+      renderHome();
+    }
+    grid.appendChild(cell);
+  }
+
+  // 后置填充
+  const totalCells = startOffset + days;
+  const tail = (7 - (totalCells % 7)) % 7;
+  for(let i=0;i<tail;i++){
+    const n = document.createElement('div'); n.className='cal-cell out card';
+    n.innerHTML = `<div class="d">${i+1}</div>`;
+    grid.appendChild(n);
+  }
+}
+
+function renderCalendar(){
+  const now = new Date();
+  const ySel = $('#calYear'), mSel = $('#calMon');
+  ySel.innerHTML=''; mSel.innerHTML='';
+  const y0 = now.getFullYear()-3, y1 = now.getFullYear()+3;
+  for(let y=y0;y<=y1;y++){
+    const op = document.createElement('option'); op.value=y; op.textContent=y; ySel.appendChild(op);
+  }
+  for(let m=1;m<=12;m++){
+    const op = document.createElement('option'); op.value=m-1; op.textContent=m; $('#calMon').appendChild(op);
+  }
+  const yInit = Number(localStorage.getItem('calY')) || now.getFullYear();
+  const mInit = Number(localStorage.getItem('calM')) || now.getMonth();
+  ySel.value = yInit; mSel.value = mInit;
+  buildCalendar(yInit, mInit);
+  $('#prevMon').onclick=()=>{
+    let y = Number(ySel.value), m = Number(mSel.value)-1;
+    if(m<0){m=11;y--;}
+    ySel.value=y; mSel.value=m; localStorage.setItem('calY',y); localStorage.setItem('calM',m);
+    buildCalendar(y,m);
+  };
+  $('#nextMon').onclick=()=>{
+    let y = Number(ySel.value), m = Number(mSel.value)+1;
+    if(m>11){m=0;y++;}
+    ySel.value=y; mSel.value=m; localStorage.setItem('calY',y); localStorage.setItem('calM',m);
+    buildCalendar(y,m);
+  };
+  ySel.onchange=mSel.onchange=()=>{
+    localStorage.setItem('calY', ySel.value);
+    localStorage.setItem('calM', mSel.value);
+    buildCalendar(Number(ySel.value), Number(mSel.value));
+  }
+}
+
+/* ------------------------- 渲染：统计（简易原生画布） ------------------------- */
+function weekBuckets(n=12){
+  // 获取过去 n 周（含本周），汇总小时与工资
+  const map = new Map();
+  state.shifts.forEach(sh=>{
+    const wk = getWeekKey(sh.date);
+    if(!map.has(wk)) map.set(wk, {minutes:0, pay:0, count:0});
+    const r = calcPayForShift(sh, state.rates);
+    map.get(wk).minutes += r.minutes;
+    map.get(wk).pay += r.pay;
+    map.get(wk).count += 1;
+  });
+  // 取最近 n 周按时间排序
+  const keys = [...map.keys()].sort();
+  const lastN = keys.slice(-n);
+  return lastN.map(k=>({week:k, hours: (map.get(k).minutes/60), pay: map.get(k).pay, count: map.get(k).count}));
+}
+
+function drawBarLineChart(){
+  const c = $('#barChart');
+  const ctx = c.getContext('2d');
+  const data = weekBuckets(12);
+  ctx.clearRect(0,0,c.width,c.height);
+  // 坐标
+  const pad = {l:50,r:50,t:20,b:40};
+  const w = c.width - pad.l - pad.r;
+  const h = c.height - pad.t - pad.b;
+
+  // 轴范围
+  const maxH = Math.max(1, Math.ceil(Math.max(...data.map(d=>d.hours),0)));
+  const maxP = Math.max(1, Math.ceil(Math.max(...data.map(d=>d.pay),0)));
+
+  // y 轴刻度（左：小时，右：工资）
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+  ctx.font = "12px system-ui";
+  ctx.textAlign="right";
+  for(let i=0;i<=5;i++){
+    const y = pad.t + h - (i/5)*h;
+    const v = (i/5)*maxH;
+    ctx.fillText(v.toFixed(0), pad.l-6, y+4);
+    ctx.strokeStyle = 'rgba(128,128,128,0.15)';
+    ctx.beginPath(); ctx.moveTo(pad.l, y); ctx.lineTo(pad.l+w, y); ctx.stroke();
+  }
+  ctx.textAlign="left";
+  for(let i=0;i<=5;i++){
+    const y = pad.t + h - (i/5)*h;
+    const v = (i/5)*maxP;
+    ctx.fillText('$'+v.toFixed(0), pad.l+w+6, y+4);
+  }
+
+  // x 轴标签
+  ctx.textAlign='center';
+  data.forEach((d,i)=>{
+    const x = pad.l + (i+0.5)*w/data.length;
+    ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--muted');
+    ctx.fillText(d.week.slice(5), x, pad.t+h+18);
+  });
+
+  // 柱（小时）
+  const barW = w/data.length*0.6;
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--primary');
+  data.forEach((d,i)=>{
+    const x = pad.l + (i+0.5)*w/data.length - barW/2;
+    const y = pad.t + h - (d.hours/maxH)*h;
+    ctx.fillRect(x, y, barW, (d.hours/maxH)*h);
+  });
+
+  // 线（工资）
+  ctx.strokeStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  data.forEach((d,i)=>{
+    const x = pad.l + (i+0.5)*w/data.length;
+    const y = pad.t + h - (d.pay/maxP)*h;
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // 点
+  ctx.fillStyle = getComputedStyle(document.documentElement).getPropertyValue('--accent');
+  data.forEach((d,i)=>{
+    const x = pad.l + (i+0.5)*w/data.length;
+    const y = pad.t + h - (d.pay/maxP)*h;
+    ctx.beginPath(); ctx.arc(x,y,3,0,Math.PI*2); ctx.fill();
+  });
+}
+
+function drawHeatmap(){
+  const grid = $('#heatGrid');
+  grid.innerHTML='';
+  // 12周 × 7天（周一到周日），第1列显示周序标签
+  const weeks = weekBuckets(12); // 顺序已按时间
+  const countsByDay = {}; // key: week + '_' + dow(1..7)
+  state.shifts.forEach(sh=>{
+    const wk = getWeekKey(sh.date);
+    const d = new Date(sh.date+'T00:00:00');
+    let dow = (d.getUTCDay()+6)%7 + 1; // 1..7
+    const key = wk+'_'+dow;
+    countsByDay[key] = (countsByDay[key]||0) + 1;
+  });
+
+  // 顶部空白
+  const topBlank = document.createElement('div'); topBlank.className='muted'; topBlank.style.textAlign='center'; topBlank.textContent='';
+  grid.appendChild(topBlank);
+  for(let k=0;k<12;k++){
+    const label = document.createElement('div'); label.className='muted'; label.style.textAlign='center'; label.textContent = weeks[k]?.week.slice(5) || '';
+    grid.appendChild(label);
+  }
+  // 7 行：周一到周日
+  const names = ['周一','周二','周三','周四','周五','周六','周日'];
+  for(let dow=1; dow<=7; dow++){
+    const rowLabel = document.createElement('div'); rowLabel.className='muted'; rowLabel.style.fontSize='12px'; rowLabel.textContent = names[dow-1];
+    grid.appendChild(rowLabel);
+    for(let i=0;i<12;i++){
+      const wk = weeks[i]?.week;
+      const cell = document.createElement('div'); cell.className='hm-cell';
+      if(wk){
+        const v = countsByDay[wk+'_'+dow]||0;
+        cell.dataset.v = String(Math.min(6, v));
+        cell.title = `${wk} ${names[dow-1]}：${v} 次`;
+      }
+      grid.appendChild(cell);
+    }
+  }
+}
+
+/* ------------------------- 渲染：设置（时薪规则） ------------------------- */
+function renderRates(){
+  const list = $('#rateList');
+  list.innerHTML='';
+  if(state.rates.length===0){
+    const h = document.createElement('div');
+    h.className='hint'; h.textContent='暂无规则，工资将按 $0 计算。请添加规则。';
+    list.appendChild(h);
+  }
+  state.rates
+    .slice()
+    .sort((a,b)=>a.start.localeCompare(b.start))
+    .forEach(r=>{
+      const row = document.createElement('div'); row.className='row';
+      row.innerHTML = `<div><strong>${r.start}–${r.end}</strong> · <span class="muted">${fmtMoney(Number(r.pay))}/h</span></div>`;
+      const del = document.createElement('button'); del.className='btn flat'; del.textContent='删除';
+      del.onclick=()=>{ state.rates = state.rates.filter(x=>x.id!==r.id); persist(); refreshAll(); };
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+}
+
+/* ------------------------- 事件绑定 ------------------------- */
+function persist(){ db.save(state); }
+function refreshAll(){
+  renderHome();
+  const y = Number(localStorage.getItem('calY')) || new Date().getFullYear();
+  const m = Number(localStorage.getItem('calM')) || new Date().getMonth();
+  buildCalendar(y,m);
+  drawBarLineChart();
+  drawHeatmap();
+  renderRates();
+}
+
+function initDefaults(){
+  // 默认当天
+  $('#date').value = todayStr();
+  // 如果没有任何时薪规则，给两条示例
+  if(state.rates.length===0){
+    state.rates = [
+      {id:uid(), start:'09:00', end:'18:00', pay:30},
+      {id:uid(), start:'18:00', end:'22:00', pay:40},
+    ];
+  }
+}
+
+function bind(){
+  // 底部导航
+  $$('.tab').forEach(t=>t.addEventListener('click', ()=>{
+    $$('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    switchView(t.dataset.to);
+  }));
+  // 添加班次
+  $('#addShiftBtn').onclick=()=>{
+    const date = $('#date').value;
+    const start = $('#start').value;
+    const end = $('#end').value;
+    if(!date || !start || !end) return alert('请完整填写 日期 / 开始 / 结束 时间');
+    if(parseHM(end) <= parseHM(start)) return alert('结束时间需晚于开始时间（跨午夜请拆分为两条记录）');
+    state.shifts.push({id:uid(), date, start, end, note:$('#note').value.trim()});
+    persist(); $('#note').value=''; refreshAll();
+  };
+  // 清除当日
+  $('#clearTodayBtn').onclick=()=>{
+    const d = $('#date').value || todayStr();
+    if(confirm(`删除 ${d} 的所有上班记录？`)){
+      state.shifts = state.shifts.filter(x=>x.date!==d);
+      persist(); refreshAll();
+    }
+  };
+  // 设置：添加时薪
+  $('#addRateBtn').onclick=()=>{
+    const s = $('#rateStart').value, e = $('#rateEnd').value, p = Number($('#ratePay').value);
+    if(!s||!e||!(p>=0)) return alert('请填写完整规则与正确的时薪');
+    if(parseHM(e)<=parseHM(s)) return alert('暂不支持跨午夜规则，请分成两条在 00:00 处断开');
+    state.rates.push({id:uid(), start:s, end:e, pay:p});
+    persist(); renderRates(); refreshAll();
+  };
+  $('#resetRateBtn').onclick=()=>{
+    if(!confirm('恢复默认两条示例规则？现有规则将被覆盖。')) return;
+    state.rates = [
+      {id:uid(), start:'09:00', end:'18:00', pay:30},
+      {id:uid(), start:'18:00', end:'22:00', pay:40},
+    ];
+    persist(); renderRates(); refreshAll();
+  };
+
+  // 导入导出
+  $('#exportBtn').onclick=()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)], {type:'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'worklog-backup.json'; a.click();
+    URL.revokeObjectURL(url);
+  };
+  $('#importFile').addEventListener('change', (e)=>{
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const data = JSON.parse(reader.result);
+        if(!data) throw new Error('格式不正确');
+        state = {
+          shifts: Array.isArray(data.shifts)? data.shifts : [],
+          rates: Array.isArray(data.rates)? data.rates : [],
+          theme: data.theme || 'system'
+        };
+        applyTheme(state.theme);
+        persist(); refreshAll(); renderRates();
+        alert('导入成功');
+      }catch(err){
+        alert('导入失败：'+err.message);
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  });
+  $('#wipeBtn').onclick=()=>{
+    if(confirm('清空所有数据（不可恢复）？')){
+      state = {shifts:[], rates:[], theme: state.theme||'system'};
+      persist(); refreshAll(); renderRates();
+    }
+  };
+
+  // 主题
+  $('#themeSel').value = state.theme || 'system';
+  $('#themeSel').onchange = (e)=>{
+    state.theme = e.target.value; applyTheme(state.theme); persist();
+  };
+
+  // 日历初始化
+  renderCalendar();
+}
+
+function switchView(id){
+  $$('.view').forEach(v=>v.classList.remove('active'));
+  $('#'+id).classList.add('active');
+  if(id==='v-stats'){ drawBarLineChart(); drawHeatmap(); }
+}
+
+function applyTheme(mode){
+  const root = document.documentElement;
+  root.removeAttribute('data-theme');
+  if(mode==='light') root.setAttribute('data-theme','light');
+  if(mode==='dark') root.setAttribute('data-theme','dark');
+  // system -> 不设置 data-theme，跟随系统
+}
+
+/* ------------------------- 启动 ------------------------- */
+initDefaults();
+bind();
+renderRates();
+applyTheme(state.theme||'system');
+renderHome();
+drawBarLineChart();
+drawHeatmap();
+
+/* 初次进入把日历定位到当月 */
+(function initCalPos(){
+  const now = new Date();
+  localStorage.setItem('calY', now.getFullYear());
+  localStorage.setItem('calM', now.getMonth());
+})();
+</script>
+</body>
+</html>
