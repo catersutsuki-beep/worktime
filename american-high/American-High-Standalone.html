@@ -1,0 +1,368 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#f1eee8" />
+  <title>American High · 美高人生模拟器</title>
+  <style>
+:root{--ink:#27312d;--muted:#718079;--paper:#f7f4ee;--paper-2:#eee9df;--white:#fffefa;--sage:#8ba493;--sage-dark:#506d5d;--sage-pale:#dfe7de;--lav:#aaa0b6;--peach:#d9a78e;--line:#d8d6ce;--gold:#bf9b5f;--shadow:0 24px 70px rgba(53,65,58,.12);--serif:"DM Serif Display",Georgia,serif;--sans:"Noto Sans SC",system-ui,sans-serif}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);font-family:var(--sans);background:var(--paper);min-height:100vh}.hidden{display:none!important}button,input{font:inherit}.grain{position:fixed;inset:0;pointer-events:none;opacity:.24;z-index:99;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.08'/%3E%3C/svg%3E")}
+.landing{min-height:100vh;padding:28px 6vw 50px;overflow:hidden;position:relative;background:radial-gradient(circle at 20% 20%,#fffdf8 0,transparent 34%),linear-gradient(135deg,#f3f0e8 0%,#ece9df 100%)}.landing:after{content:"";position:absolute;width:45vw;height:45vw;border:1px solid rgba(91,116,100,.12);border-radius:50%;right:-13vw;top:-20vw;box-shadow:0 0 0 70px rgba(91,116,100,.025),0 0 0 150px rgba(91,116,100,.02)}.landing-nav{display:flex;justify-content:space-between;align-items:center;position:relative;z-index:2}.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink);font-family:var(--serif);font-size:15px;letter-spacing:.12em}.brand-mark{width:42px;height:42px;border-radius:50%;background:var(--sage-dark);color:#fff;display:grid;place-items:center;font-size:16px;letter-spacing:.04em;box-shadow:inset 0 0 0 1px rgba(255,255,255,.3)}.school-chip{padding:9px 14px;border:1px solid var(--line);border-radius:99px;font-size:11px;letter-spacing:.12em;color:var(--muted);background:rgba(255,255,255,.45)}
+.hero-grid{max-width:1240px;margin:8vh auto 0;display:grid;grid-template-columns:1fr .95fr;gap:8vw;align-items:center;position:relative;z-index:1}.eyebrow{font-size:11px;font-weight:700;letter-spacing:.18em;color:var(--sage-dark);margin:0 0 18px}.hero-copy h1{font-family:var(--serif);font-size:clamp(52px,6vw,88px);line-height:1.02;font-weight:400;letter-spacing:-.035em;margin:0}.hero-copy h1 em{color:var(--sage-dark);font-weight:400}.hero-lede{font-size:16px;line-height:1.9;color:#657169;max-width:570px;margin:28px 0}.primary-btn{border:0;background:var(--sage-dark);color:white;padding:15px 18px 15px 22px;border-radius:4px;display:inline-flex;align-items:center;justify-content:space-between;gap:48px;min-width:190px;cursor:pointer;box-shadow:0 9px 24px rgba(80,109,93,.22);transition:.25s}.primary-btn:hover{transform:translateY(-2px);background:#435e4f}.primary-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}.hero-notes{display:flex;gap:22px;flex-wrap:wrap;margin-top:28px;color:#7c867f;font-size:12px}
+.yearbook{height:570px;position:relative;transform:rotate(1deg)}.photo{background:white;padding:12px;box-shadow:var(--shadow);position:absolute}.photo-main{inset:35px 45px 65px 20px;overflow:hidden}.sky{position:absolute;inset:12px 12px 38%;background:linear-gradient(#c5d4d0,#e6e6d5)}.sun{position:absolute;width:70px;height:70px;border-radius:50%;background:#eee3c4;right:55px;top:60px}.lawn{position:absolute;left:12px;right:12px;bottom:42px;height:41%;background:linear-gradient(#9eaf94,#718a75)}.school-building{position:absolute;width:75%;height:39%;left:12%;bottom:34%;background:#c5a895;box-shadow:inset 0 -8px rgba(90,70,65,.08)}.school-building .roof{position:absolute;width:110%;height:24px;left:-5%;top:-22px;background:#686d65;clip-path:polygon(4% 100%,15% 0,85% 0,96% 100%)}.door{position:absolute;width:16%;height:55%;left:42%;bottom:0;background:#53675b;border:4px solid #e2ddd0}.windows{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding:28px}.windows i{height:34px;background:#dbe5df;border:4px solid #8b776e}.photo-label{position:absolute;bottom:17px;left:0;right:0;text-align:center;font-family:var(--serif);font-size:13px;letter-spacing:.13em}.polaroid{position:absolute;background:#fffefb;padding:12px;box-shadow:0 16px 36px rgba(50,55,51,.16);font-family:var(--serif);text-align:center;z-index:3}.polaroid-a{right:0;bottom:12px;width:150px;height:170px;transform:rotate(8deg);background:linear-gradient(#faf9f2 0 74%,#fff 74%)}.polaroid-a:before{content:"30";display:grid;place-items:center;height:110px;background:#d9aaa0;color:white;font-size:58px}.polaroid-a span{font-size:10px;letter-spacing:.12em}.polaroid-a b{font-size:14px}.polaroid-b{left:-24px;bottom:10px;width:130px;height:132px;transform:rotate(-9deg);display:grid;place-items:center;background:#e5dfeb;color:#625b67;font-size:18px;line-height:1.1}.yearbook-tape{position:absolute;width:100px;height:28px;background:rgba(214,200,169,.6);z-index:5}.tape-a{top:28px;left:0;transform:rotate(-8deg)}.tape-b{right:35px;top:60px;transform:rotate(15deg)}.doodle{position:absolute;right:-38px;top:5px;width:120px;fill:none;stroke:#7f9986;stroke-width:2;stroke-linecap:round}
+.app{display:grid;grid-template-columns:220px 1fr;min-height:100vh;background:#efede6}.sidebar{position:fixed;z-index:20;left:0;top:0;bottom:0;width:220px;padding:28px 22px 20px;background:#f8f6f1;border-right:1px solid var(--line);display:flex;flex-direction:column}.brand.compact{font-size:12px;line-height:1.1}.sidebar-year{margin:40px 4px 24px;padding:14px 0;border-block:1px solid var(--line)}.sidebar-year small{display:block;color:var(--muted);font-size:9px;letter-spacing:.16em}.sidebar-year strong{font-family:var(--serif);font-weight:400}.side-nav{display:grid;gap:7px}.nav-item{display:flex;align-items:center;gap:12px;border:0;background:transparent;color:#737c76;padding:12px 13px;border-radius:5px;text-align:left;cursor:pointer}.nav-item span{font-size:18px}.nav-item b{font-size:13px}.nav-item:hover,.nav-item.active{background:var(--sage-pale);color:var(--sage-dark)}.reset-btn{margin-top:auto;border:0;background:transparent;color:#8a8e88;padding:10px;text-align:left;font-size:12px;cursor:pointer}.game-shell{grid-column:2;min-width:0}.game-header{height:104px;padding:25px 42px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--line);background:rgba(247,245,239,.86);position:sticky;top:0;backdrop-filter:blur(15px);z-index:10}.game-header .eyebrow{margin:0 0 5px;font-size:9px}.game-header h2{font-family:var(--serif);font-weight:400;font-size:24px;margin:0}.time-pill{display:flex;align-items:center;gap:8px;padding:9px 13px;background:var(--white);border:1px solid var(--line);border-radius:30px;font-size:11px;color:var(--muted)}.pulse{width:7px;height:7px;border-radius:50%;background:#8dad92;box-shadow:0 0 0 5px rgba(141,173,146,.14)}.mobile-menu{display:none;border:0;background:transparent;font-size:22px;color:var(--ink)}
+.setup-layout{padding:52px 5vw;display:grid;grid-template-columns:minmax(0,760px) 280px;gap:36px;justify-content:center}.setup-card{background:var(--white);padding:38px 44px;border:1px solid var(--line);box-shadow:0 18px 50px rgba(63,72,67,.08);min-height:590px;display:flex;flex-direction:column}.progress-meta{display:flex;justify-content:space-between;font-size:10px;letter-spacing:.11em;color:var(--muted)}.progress-track{height:2px;background:#e6e4dc;margin:12px 0 45px}.progress-track i{display:block;height:100%;background:var(--sage-dark);width:10%;transition:.35s}.question-mount{flex:1}.question-kicker{font-size:11px;color:var(--sage-dark);font-weight:700;letter-spacing:.13em}.question-mount h3{font-family:var(--serif);font-size:38px;font-weight:400;line-height:1.25;margin:9px 0 10px}.question-mount>.hint{color:var(--muted);font-size:13px;margin-bottom:28px}.option-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.option{border:1px solid var(--line);background:#fbfaf6;padding:15px 16px;min-height:68px;text-align:left;cursor:pointer;border-radius:4px;transition:.2s}.option:hover{border-color:#a8b8ab;transform:translateY(-1px)}.option.selected{background:var(--sage-pale);border-color:var(--sage)}.option b{display:block;font-size:13px}.option span{display:block;color:var(--muted);font-size:11px;margin-top:3px}.name-input{margin-top:36px;border:0;border-bottom:2px solid var(--sage);font-family:var(--serif);font-size:42px;background:transparent;width:100%;padding:8px 0;color:var(--ink);outline:none}.name-input::placeholder{color:#cecfc7}.setup-actions{display:flex;justify-content:space-between;align-items:center;margin-top:32px;padding-top:23px;border-top:1px solid #ebe9e2}.setup-actions .primary-btn{min-width:130px;gap:28px;padding:12px 15px}.text-btn{background:none;border:0;color:var(--muted);font-size:12px;cursor:pointer;padding:10px}.setup-aside{display:grid;align-content:start;gap:14px}.quote-card,.fact-card{padding:28px;background:#dde4dc;min-height:230px}.quote-mark{font-family:var(--serif);font-size:52px;color:#758b7c;line-height:.6}.quote-card p{font-family:var(--serif);font-size:22px;line-height:1.5;margin:15px 0 26px}.quote-card small{font-size:8px;letter-spacing:.17em;color:#68766e}.fact-card{background:#e9e2ea;min-height:auto}.fact-card b{font-size:13px}.fact-card p{font-size:12px;line-height:1.7;color:#6d6870;margin-bottom:0}
+.dashboard{padding:35px 4vw 60px;max-width:1400px;margin:auto}.panel{display:none}.panel.active{display:block}.story-layout{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px}.scene-card{background:var(--white);border:1px solid var(--line)}.scene-cover{height:155px;background:linear-gradient(115deg,#cfd9d5,#dfe4d5 55%,#f0dfc5);position:relative;overflow:hidden}.scene-cover:before,.scene-cover:after{content:"";position:absolute;bottom:-20px;background:#77907b;clip-path:polygon(0 100%,100% 100%,90% 0,15% 15%)}.scene-cover:before{left:-20px;width:62%;height:90px}.scene-cover:after{right:-30px;width:58%;height:65px;background:#92a68f}.scene-tag{position:absolute;z-index:2;top:16px;left:18px;font-size:9px;letter-spacing:.15em;padding:7px 10px;background:rgba(255,255,255,.72)}.scene-icon{position:absolute;right:12%;top:24%;font-size:65px;color:#f7e6b9}.scene-copy{padding:30px 34px}.chapter{display:flex;align-items:center;gap:10px;color:var(--sage-dark);font-size:9px;letter-spacing:.15em}.chapter i{width:24px;height:1px;background:var(--sage)}.scene-copy h3{font-family:var(--serif);font-size:30px;font-weight:400;margin:13px 0 18px}.scene-copy>div#storyText p{font-family:var(--serif);font-size:16px;line-height:1.9;color:#4e5752}.npc-dialogue{border-left:3px solid var(--lav);margin-top:25px;padding:4px 0 4px 20px}.npc-head{display:flex;align-items:center;gap:10px}.avatar{width:34px;height:34px;background:#d9cddc;border-radius:50%;display:grid;place-items:center;font-family:var(--serif)}.npc-head b{display:block;font-size:12px}.npc-head small{display:block;font-size:9px;color:var(--muted);margin-top:2px}.npc-dialogue p{font-family:var(--serif);font-weight:600;font-size:17px;margin:14px 0 8px}.npc-dialogue em{color:#788d7d;font-size:12px}.day-card{background:#4e6859;color:#f8f7f1;padding:25px;height:max-content}.day-head{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.2);padding-bottom:20px}.day-head small{display:block;font-size:8px;letter-spacing:.15em;opacity:.65}.day-head b{font-family:var(--serif);font-weight:400}.day-head>span{font-size:9px;padding:6px;border:1px solid rgba(255,255,255,.3);height:max-content}.condition-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:18px 0;border-bottom:1px solid rgba(255,255,255,.2)}.condition-grid small{font-size:7px;letter-spacing:.1em;opacity:.6}.condition-grid b{display:block;font-size:11px;margin-top:4px}.timeline{padding-top:19px}.timeline>div{display:grid;grid-template-columns:12px 42px 1fr;gap:6px;align-items:center;height:38px;position:relative;font-size:10px;opacity:.55}.timeline i{width:7px;height:7px;border:1px solid white;border-radius:50%;position:relative}.timeline>div:not(:last-child) i:after{content:"";position:absolute;width:1px;height:33px;background:rgba(255,255,255,.3);left:2px;top:7px}.timeline .done,.timeline .current{opacity:1}.timeline .done i{background:white}.timeline .current i{background:#e6cba4;box-shadow:0 0 0 4px rgba(230,203,164,.15)}.timeline p{margin:0}.action-card{margin-top:22px;background:var(--white);border:1px solid var(--line);padding:26px 30px}.action-title{display:flex;justify-content:space-between;align-items:end}.action-title small{font-size:8px;letter-spacing:.16em;color:var(--sage-dark)}.action-title h3{font-family:var(--serif);font-weight:400;margin:3px 0 0}.action-title>span{font-size:10px;color:var(--muted)}.choice-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}.story-choice{padding:15px 16px;text-align:left;border:1px solid var(--line);background:#faf9f5;border-radius:3px;cursor:pointer}.story-choice:hover{border-color:var(--sage);background:var(--sage-pale)}.story-choice b{display:block;font-size:12px}.story-choice span{font-size:10px;color:var(--muted)}.free-action{margin-top:17px}.free-action label{font-size:10px;color:var(--muted)}.free-action>div{display:flex;border-bottom:1px solid var(--line);margin-top:5px}.free-action input{flex:1;border:0;background:transparent;padding:10px 0;outline:none;font-size:12px}.free-action button{border:0;background:transparent;color:var(--sage-dark);cursor:pointer;font-size:20px}.consequence{margin-top:18px;padding:15px;background:#edf1eb;color:#536359;font-size:12px;line-height:1.7;border-left:3px solid var(--sage)}
+.panel-title{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px}.panel-title .eyebrow{margin:0 0 7px}.panel-title h3{font-family:var(--serif);font-weight:400;font-size:32px;margin:0}.grade-badge{font-size:9px;letter-spacing:.13em;border:1px solid var(--line);padding:9px 12px;background:var(--white)}.profile-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:22px}.paper-card{background:var(--white);border:1px solid var(--line);padding:30px}.paper-card h4{margin:0 0 26px;font-family:var(--serif);letter-spacing:.08em}.paper-card h4 span{font-family:var(--sans);font-size:10px;color:var(--muted);font-weight:400;margin-left:8px}.identity-card dl{display:grid;grid-template-columns:1fr 1fr;margin:0}.identity-card dl div{border-bottom:1px solid #e8e5de;padding:12px 0}.identity-card dt{font-size:9px;color:var(--muted);letter-spacing:.09em}.identity-card dd{margin:5px 0 0;font-size:13px}.identity-card blockquote{margin:25px 0 0;padding:18px;background:#eef1eb;font-family:var(--serif);line-height:1.7;color:#526057}.gpa{background:#eee8dc;padding:22px}.gpa small{display:block;font-size:9px;color:var(--muted)}.gpa strong{font-family:var(--serif);font-size:40px;font-weight:400}.gpa span{display:block;font-size:10px;color:var(--muted)}.attribute-list{display:grid;gap:17px;margin-top:24px}.attribute-list>div{display:grid;grid-template-columns:135px 1fr 60px;align-items:center;gap:10px;font-size:10px}.attribute-list i{height:5px;background:#e3e4de;position:relative}.attribute-list i:after{content:"";position:absolute;inset:0 auto 0 0;width:var(--value);background:var(--sage)}.attribute-list em{font-style:normal;color:var(--muted);font-size:9px}.status-note{font-size:10px;color:var(--muted);margin-top:25px}.schedule-list{display:grid;gap:9px}.course{display:grid;grid-template-columns:70px 1fr 160px 80px;align-items:center;background:var(--white);border:1px solid var(--line);padding:15px 18px}.course-time{font-family:var(--serif);font-size:18px}.course b{font-size:13px}.course small{display:block;color:var(--muted);font-size:10px}.course-teacher{font-size:11px;color:var(--muted)}.course-level{font-size:9px;letter-spacing:.1em;text-align:right}.balance-note{display:flex;gap:15px;background:#e2e8e0;margin-top:22px;padding:20px}.balance-note span{font-size:26px}.balance-note b{font-size:12px}.balance-note p{font-size:11px;color:var(--muted);margin:4px 0 0}.relation-card{display:flex;gap:22px;background:var(--white);border:1px solid var(--line);padding:28px}.relation-avatar{width:85px;height:85px;border-radius:50%;background:#d8cddd;display:grid;place-items:center;font-family:var(--serif);font-size:32px;flex:0 0 auto}.relation-main{flex:1}.relation-main>div:first-child{display:flex;justify-content:space-between}.relation-main h4{font-family:var(--serif);font-size:22px;font-weight:400;margin:0}.relation-main>div>span{font-size:10px;color:#826f8a;background:#eee8f0;padding:6px 8px;height:max-content}.relation-main>p{font-size:11px;color:var(--muted)}.meters{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:20px}.meters label{font-size:9px;color:var(--muted)}.meters i{display:block;height:5px;background:#e6e5df;margin:7px 0 4px}.meters i b{display:block;height:100%;background:var(--lav)}.meters span{font-size:9px}.empty-note{padding:20px;border:1px dashed #c8c7bf;margin-top:17px;text-align:center;color:var(--muted);font-size:11px}.toast{position:fixed;z-index:200;bottom:22px;left:50%;transform:translate(-50%,30px);background:#26342c;color:white;padding:11px 18px;border-radius:4px;font-size:11px;opacity:0;pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1000px){.hero-grid{gap:3vw}.yearbook{transform:scale(.88)}.setup-layout{grid-template-columns:1fr}.setup-aside{display:none}.story-layout{grid-template-columns:1fr}.day-card{display:none}.profile-grid{grid-template-columns:1fr}}
+@media(max-width:760px){.landing{padding:20px 22px 35px}.school-chip{display:none}.hero-grid{grid-template-columns:1fr;margin-top:8vh}.hero-copy h1{font-size:49px}.hero-lede{font-size:14px}.hero-notes{gap:10px 16px}.yearbook{height:400px;transform:scale(.85);transform-origin:top center;margin-bottom:-60px}.app{display:block}.sidebar{transform:translateX(-101%);transition:.25s;box-shadow:20px 0 50px rgba(0,0,0,.12)}.sidebar.open{transform:translateX(0)}.game-shell{width:100%}.game-header{height:86px;padding:18px 18px}.mobile-menu{display:block}.game-header>div:nth-child(2){margin-right:auto;margin-left:13px}.game-header h2{font-size:18px}.time-pill{padding:7px}.time-pill span:last-child{display:none}.setup-layout{padding:22px 14px}.setup-card{padding:25px 20px;min-height:calc(100vh - 130px)}.progress-track{margin-bottom:30px}.question-mount h3{font-size:30px}.option-grid{grid-template-columns:1fr}.option{min-height:58px;padding:12px 14px}.name-input{font-size:34px}.dashboard{padding:18px 14px 40px}.scene-cover{height:120px}.scene-copy{padding:22px 20px}.scene-copy h3{font-size:25px}.action-card{padding:20px 16px}.action-title>span{display:none}.choice-row{grid-template-columns:1fr}.panel-title{align-items:flex-start}.panel-title h3{font-size:25px}.grade-badge{display:none}.paper-card{padding:22px 18px}.identity-card dl{grid-template-columns:1fr}.attribute-list>div{grid-template-columns:115px 1fr}.attribute-list em{display:none}.course{grid-template-columns:55px 1fr 45px;padding:12px}.course-teacher{display:none}.meters{grid-template-columns:1fr}.relation-card{padding:20px 16px;gap:12px}.relation-avatar{width:52px;height:52px}.relation-main>div:first-child{display:block}.relation-main>div>span{display:inline-block;margin-top:6px}}
+@media(max-width:390px){.hero-copy h1{font-size:42px}.yearbook{transform:scale(.75);margin-left:-35px;margin-right:-35px}.setup-actions .primary-btn{min-width:115px}.question-mount h3{font-size:27px}}
+.option.selected{background:#d6e2d8;border-color:#587565;color:#23332a;box-shadow:inset 4px 0 0 #587565,0 5px 14px rgba(80,109,93,.12)}.option.selected b{color:#23332a}.option.selected span{color:#52665a}.option.selected:after{content:"✓ 已选择";display:block;margin-top:7px;color:#4d6c5a;font-size:9px;font-weight:700;letter-spacing:.08em}.npc-dialogue{background:#f0ebf2;color:#29252c;border-left-color:#8d769b;border-radius:0 5px 5px 0;padding:16px 18px}.npc-head b,.npc-dialogue p{color:#29252c}.npc-head small{color:#6f6574}.npc-dialogue em{color:#526c5a}.free-action input{color:#27312d}.free-action input::placeholder{color:#8b938e;opacity:1}
+.consequence{display:flex;align-items:center;justify-content:space-between;gap:18px}.consequence>span{flex:1}.continue-story{flex:0 0 auto;border:0;background:#506d5d;color:#fff;padding:10px 12px 10px 15px;border-radius:3px;display:flex;align-items:center;gap:16px;cursor:pointer;font-size:11px}.continue-story:hover{background:#3f5b4b;transform:translateX(2px)}
+@media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important;transition:none!important}}
+
+  </style>
+</head>
+<body>
+  <div class="grain" aria-hidden="true"></div>
+
+  <section class="landing" id="landing">
+    <nav class="landing-nav" aria-label="站点导航">
+      <a class="brand" href="#" aria-label="American High 首页">
+        <span class="brand-mark">AH</span>
+        <span>AMERICAN HIGH</span>
+      </a>
+      <span class="school-chip">California · Fall 2026</span>
+    </nav>
+
+    <div class="hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow">A FOUR-YEAR STORY · 一场四年的青春实验</p>
+        <h1>没有标准答案的<br><em>美高人生。</em></h1>
+        <p class="hero-lede">成绩、友情、社团与家庭，共享同一份时间。你做出的每个选择，都会慢慢长成属于你的高中四年。</p>
+        <button class="primary-btn hero-start" id="startBtn">
+          <span>开始新学期</span><span aria-hidden="true">↗</span>
+        </button>
+        <div class="hero-notes">
+          <span>◌ 渐进式关系</span><span>◌ 真实时间预算</span><span>◌ 多线结局</span>
+        </div>
+      </div>
+
+      <div class="yearbook" aria-label="校园年鉴风格插画">
+        <div class="yearbook-tape tape-a"></div>
+        <div class="yearbook-tape tape-b"></div>
+        <div class="photo photo-main">
+          <div class="sky"></div>
+          <div class="sun"></div>
+          <div class="school-building">
+            <div class="roof"></div><div class="door"></div>
+            <div class="windows"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          </div>
+          <div class="lawn"></div>
+          <span class="photo-label">CEDAR RIDGE HIGH</span>
+        </div>
+        <div class="polaroid polaroid-a"><span>CLASS OF<br><b>2030</b></span></div>
+        <div class="polaroid polaroid-b"><span>Make it<br>yours.</span></div>
+        <svg class="doodle" viewBox="0 0 120 60" aria-hidden="true"><path d="M4 42c20-34 41 4 57-21 11-18 29 16 54-14"/><path d="m107 2 10 4-5 9"/></svg>
+      </div>
+    </div>
+  </section>
+
+  <main class="app hidden" id="app">
+    <aside class="sidebar">
+      <a class="brand compact" href="#" aria-label="American High"><span class="brand-mark">AH</span><span>AMERICAN<br>HIGH</span></a>
+      <div class="sidebar-year"><small>SCHOOL YEAR</small><strong>2026—27</strong></div>
+      <nav class="side-nav" aria-label="游戏功能">
+        <button class="nav-item active" data-panel="story"><span>⌂</span><b>今日故事</b></button>
+        <button class="nav-item" data-panel="profile"><span>◎</span><b>学生档案</b></button>
+        <button class="nav-item" data-panel="schedule"><span>▦</span><b>课程日程</b></button>
+        <button class="nav-item" data-panel="relations"><span>♡</span><b>关系网络</b></button>
+      </nav>
+      <button class="reset-btn" id="resetBtn">↺ 重新开始</button>
+    </aside>
+
+    <section class="game-shell">
+      <header class="game-header">
+        <button class="mobile-menu" id="mobileMenu" aria-label="打开菜单">☰</button>
+        <div><p class="eyebrow">CEDAR RIDGE HIGH SCHOOL</p><h2 id="headerTitle">你的故事，从今天开始</h2></div>
+        <div class="time-pill"><span class="pulse"></span><span id="dateLabel">开学前 · 周日</span></div>
+      </header>
+
+      <div class="setup-layout" id="setupView">
+        <section class="setup-card">
+          <div class="progress-meta"><span id="stepLabel">STEP 01 / 10</span><span id="progressText">建立你的故事</span></div>
+          <div class="progress-track"><i id="progressBar"></i></div>
+          <div id="questionMount" class="question-mount" aria-live="polite"></div>
+          <div class="setup-actions">
+            <button class="text-btn" id="backBtn">← 上一步</button>
+            <button class="primary-btn" id="nextBtn"><span>继续</span><span>→</span></button>
+          </div>
+        </section>
+        <aside class="setup-aside">
+          <div class="quote-card"><span class="quote-mark">“</span><p id="asideQuote">你不会因为选择了某种背景，就自动成为某一种人。</p><small>GUIDANCE COUNSELOR'S NOTE</small></div>
+          <div class="fact-card"><b>你的选择没有优劣</b><p>它们会改变故事的起点、资源与关系，但不会直接换算成“属性加成”。</p></div>
+        </aside>
+      </div>
+
+      <div class="dashboard hidden" id="dashboard">
+        <section class="panel active" id="panel-story">
+          <div class="story-layout">
+            <article class="scene-card">
+              <div class="scene-cover scene-morning"><span class="scene-tag">MONDAY · 7:42 AM</span><div class="scene-icon">☀</div></div>
+              <div class="scene-copy">
+                <div class="chapter"><span>CHAPTER 01</span><i></i><span>FIRST BELL</span></div>
+                <h3>走进 Cedar Ridge 的第一天</h3>
+                <div id="storyText"></div>
+                <div class="npc-dialogue" id="npcDialogue">
+                  <div class="npc-head"><span class="avatar">M</span><div><b>Maya（玛雅）</b><small>新认识的同学 · Acquaintance（熟人）</small></div></div>
+                  <p>“你也是九年级新生吧？礼堂好像在东翼……要一起找吗？”</p>
+                  <em>她把皱巴巴的校园地图转了个方向，自己也忍不住笑了。</em>
+                </div>
+              </div>
+            </article>
+
+            <aside class="day-card">
+              <div class="day-head"><div><small>TODAY</small><b>开学第一天</b></div><span>DAY 1</span></div>
+              <div class="condition-grid"><div><small>精力 ENERGY</small><b id="energyText">状态充足</b></div><div><small>心情 MOOD</small><b id="moodText">有点期待</b></div></div>
+              <div class="timeline"><div class="done"><i></i><span>07:30</span><p>抵达校园</p></div><div class="current"><i></i><span>08:00</span><p>新生报到</p></div><div><i></i><span>08:30</span><p>Homeroom（班会）</p></div><div><i></i><span>12:10</span><p>Lunch（午餐）</p></div><div><i></i><span>15:15</span><p>放学后</p></div></div>
+            </aside>
+          </div>
+
+          <section class="action-card">
+            <div class="action-title"><div><small>WHAT DO YOU DO?</small><h3>你想怎么回应？</h3></div><span>选择会消耗时间，并影响后续经历</span></div>
+            <div class="choice-row" id="choiceRow">
+              <button class="story-choice" data-action="together"><b>和 Maya 一起找礼堂</b><span>认识校园 · 约 15 分钟</span></button>
+              <button class="story-choice" data-action="solo"><b>礼貌道别，自己去找</b><span>独立探索 · 约 10 分钟</span></button>
+            </div>
+            <div class="consequence hidden" id="consequence" aria-live="polite"></div>
+          </section>
+        </section>
+
+        <section class="panel" id="panel-profile">
+          <div class="panel-title"><div><p class="eyebrow">STUDENT PROFILE · 学生档案</p><h3 id="profileName">—</h3></div><span class="grade-badge">FRESHMAN · 九年级</span></div>
+          <div class="profile-grid">
+            <article class="identity-card paper-card"><h4>IDENTITY CARD <span>身份卡</span></h4><dl id="identityList"></dl><blockquote id="startingPoint"></blockquote></article>
+            <article class="status-card paper-card"><h4>CURRENT STATUS <span>当前状态</span></h4><div class="gpa"><small>Current GPA</small><strong>—</strong><span>第一学期尚未出分</span></div><div class="attribute-list"><div><span>Academic 学术</span><i style="--value:0%"></i><em>尚未形成</em></div><div><span>Social 社交</span><i style="--value:0%"></i><em>尚未形成</em></div><div><span>Reputation 声誉</span><i style="--value:0%"></i><em>尚未形成</em></div><div><span>Influence 影响力</span><i style="--value:0%"></i><em>尚未形成</em></div></div><p class="status-note">核心能力会从长期、可回溯的经历中逐渐形成。</p></article>
+          </div>
+        </section>
+
+        <section class="panel" id="panel-schedule">
+          <div class="panel-title"><div><p class="eyebrow">COURSE SCHEDULE · 课程日程</p><h3>Fall Semester · 秋季学期</h3></div><span class="grade-badge">7 PERIODS</span></div>
+          <div class="schedule-list" id="scheduleList"></div>
+          <div class="balance-note"><span>◷</span><div><b>时间是唯一的硬约束</b><p>课程难度会改变作业量与压力，也会挤占社团、朋友、家庭和休息时间。</p></div></div>
+        </section>
+
+        <section class="panel" id="panel-relations">
+          <div class="panel-title"><div><p class="eyebrow">SOCIAL NETWORK · 关系网络</p><h3>每段关系都有自己的速度</h3></div><span class="grade-badge">1 CONNECTION</span></div>
+          <article class="relation-card"><div class="relation-avatar">M</div><div class="relation-main"><div><h4>Maya Chen（陈玛雅）</h4><span>Acquaintance · 熟人</span></div><p>在新生报到前认识的同学。她似乎同样对新校园有些迷路。</p><div class="meters"><label>Trust 信任 <i><b style="width:12%"></b></i><span>12 / 100</span></label><label>Familiarity 熟悉 <i><b style="width:18%"></b></i><span>18 / 100</span></label><label>Affection 情感 <i><b style="width:8%"></b></i><span>8 / 100</span></label></div></div></article>
+          <div class="empty-note">关系不会因一次“正确回答”跳级。共同经历、边界与时间，才会决定你们成为怎样的人。</div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script>
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+
+const optionSets = {
+  pace: [['fast','Fast Pace','快节奏 · 关键事件推进'],['slow','Slow Pace','慢节奏 · 更多日常细节']],
+  economy: [['working','Working Class','工薪家庭'],['middle','Middle Class','中产家庭'],['upper','Upper-Middle Class','中上家庭'],['affluent','Affluent','富裕家庭'],['strained','Financially Strained','经济承压']],
+  family: [['two','Two-Parent','双亲家庭'],['single','Single-Parent','单亲家庭'],['blended','Blended','重组家庭'],['extended','Extended','大家庭'],['guardian','Guardian','监护人家庭']],
+  enrollment: [['local','Local Student','本地生'],['transfer','Transfer Student','转学生'],['moved','Moved From Another State','外州搬来'],['newcomer','Newcomer Family','新移民家庭'],['international','International Student','国际学生'],['legacy','Community Legacy','本地世家']],
+  atmosphere: [['academic','Academic-Oriented','学术导向'],['achievement','Achievement-Oriented','成就导向'],['balanced','Balanced','平衡型'],['independent','Independent','高自主型'],['protective','Protective','保护型'],['complicated','Complicated','复杂型']],
+  personality: [['introverted','Introverted','内向'],['outgoing','Outgoing','外向'],['ambitious','Ambitious','有野心'],['easygoing','Easygoing','随和'],['competitive','Competitive','好胜'],['curious','Curious','好奇'],['creative','Creative','有创造力'],['responsible','Responsible','责任感'],['rebellious','Rebellious','叛逆'],['empathetic','Empathetic','共情'],['independent','Independent','独立'],['people','People-Pleasing','讨好型']],
+  interests: [['reading','Reading','阅读'],['science','Science','科学'],['technology','Technology','科技'],['art','Art','艺术'],['music','Music','音乐'],['drama','Drama','戏剧'],['sports','Sports','体育'],['photo','Photography','摄影'],['writing','Writing','写作'],['fashion','Fashion','时尚'],['gaming','Gaming','游戏'],['film','Film-Media','影视媒体'],['undecided','Undecided','尚未决定']],
+  study: [['challenge','I enjoy a challenge','愿意接受适度挑战'],['steady','I prefer steady progress','更喜欢稳定节奏'],['space','I need room to explore','希望保留探索时间']],
+  subject: [['stem','Math & Science','数学与科学'],['words','Language & Society','语言与社会'],['arts','Arts & Making','艺术与创作'],['mixed','A little of everything','都想尝试']],
+  workload: [['high','A demanding week','愿意承担较多作业'],['balanced','A balanced week','学习与生活平衡'],['light','Room after school','保留充足课后时间']]
+};
+const questions = [
+  {key:'pace',kicker:'GAME RHYTHM · 游戏节奏',title:'你希望时间如何流动？',hint:'可在关键事件间快速推进，也可以停留在更多细腻日常。',type:'single'},
+  {key:'name',kicker:'STUDENT ID · 学生姓名',title:'大家该怎么称呼你？',hint:'输入英文名。它会出现在家人姓氏、NPC 对话与学生档案中。',type:'name'},
+  {key:'economy',kicker:'FAMILY RESOURCES · 家庭资源',title:'你的家庭经济背景是？',hint:'它影响生活资源与课外成本，但不会直接改变能力。',type:'single'},
+  {key:'family',kicker:'HOME LIFE · 家庭结构',title:'你和怎样的家人一起生活？',hint:'家庭结构会决定常驻家庭成员与日常互动。',type:'single'},
+  {key:'enrollment',kicker:'FIRST DAY · 入学背景',title:'你是怎样来到 Cedar Ridge 的？',hint:'这会影响你对校园的熟悉度和已有的人际联系。',type:'single'},
+  {key:'atmosphere',kicker:'FAMILY CULTURE · 家庭氛围',title:'家里的空气，更接近哪一种？',hint:'没有一种家庭天然更幸福；它只会塑造期待、边界与沟通方式。',type:'single'},
+  {key:'personality',kicker:'PERSONALITY · 人格倾向',title:'选出 2–3 个更像现在的你',hint:'性格会随着四年经历变化，不会永久锁定。',type:'multi',min:2,max:3},
+  {key:'interests',kicker:'INTERESTS · 兴趣方向',title:'什么会让你愿意多停留一会？',hint:'选择 1–3 项。兴趣不等同于必须加入对应社团。',type:'multi',min:1,max:3},
+  {key:'subject',kicker:'ACADEMIC FIT · 学术倾向',title:'课堂上，你更容易被什么吸引？',hint:'这只用于生成第一版课程组合。',type:'single'},
+  {key:'workload',kicker:'TIME BUDGET · 时间预算',title:'你希望第一学期有多紧凑？',hint:'课程越难，课后作业与压力通常也越高。',type:'single'}
+];
+const labels = Object.fromEntries(Object.entries(optionSets).map(([key,items])=>[key,Object.fromEntries(items.map(([v,e,c])=>[v,`${e}（${c}）`]))]));
+let state = JSON.parse(localStorage.getItem('americanHighState') || 'null') || {step:0,answers:{},started:false,actionTaken:false,storyStage:0,day:1};
+
+function save(){ localStorage.setItem('americanHighState',JSON.stringify(state)); }
+function toast(message){ const el=$('#toast'); el.textContent=message; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),2200); }
+
+function renderQuestion(){
+  const q=questions[state.step], mount=$('#questionMount');
+  $('#stepLabel').textContent=`STEP ${String(state.step+1).padStart(2,'0')} / ${questions.length}`;
+  $('#progressText').textContent=state.step<7?'建立你的故事':'规划第一学期';
+  $('#progressBar').style.width=`${(state.step+1)/questions.length*100}%`;
+  $('#backBtn').style.visibility=state.step===0?'hidden':'visible';
+  $('#nextBtn span:first-child').textContent=state.step===questions.length-1?'进入校园':'继续';
+  mount.innerHTML=`<span class="question-kicker">${q.kicker}</span><h3>${q.title}</h3><p class="hint">${q.hint}</p>`;
+  if(q.type==='name'){
+    mount.insertAdjacentHTML('beforeend',`<input class="name-input" id="nameInput" autocomplete="given-name" maxlength="24" placeholder="Your name" value="${escapeHtml(state.answers.name||'')}">`);
+    $('#nameInput').focus();
+    $('#nameInput').addEventListener('input',e=>{state.answers.name=e.target.value.trim();save();updateNext(q)});
+    $('#nameInput').addEventListener('keydown',e=>{if(e.key==='Enter') nextStep()});
+  }else{
+    const selected=state.answers[q.key]|| (q.type==='multi'?[]:'');
+    mount.insertAdjacentHTML('beforeend',`<div class="option-grid">${optionSets[q.key].map(([v,en,zh])=>`<button class="option ${(q.type==='multi' ? selected.includes(v) : selected===v) ? 'selected' : ''}" data-value="${v}" aria-pressed="${q.type==='multi' ? selected.includes(v) : selected===v}"><b>${en}</b><span>${zh}</span></button>`).join('')}</div>`);
+    $$('.option',mount).forEach(btn=>btn.addEventListener('click',()=>selectOption(q,btn)));
+  }
+  updateNext(q);
+}
+function selectOption(q,btn){
+  const value=btn.dataset.value;
+  if(q.type==='multi'){
+    let arr=[...(state.answers[q.key]||[])];
+    if(arr.includes(value)) arr=arr.filter(x=>x!==value); else if(arr.length<q.max) arr.push(value); else return toast(`最多选择 ${q.max} 项`);
+    state.answers[q.key]=arr;
+  }else state.answers[q.key]=value;
+  save(); renderQuestion();
+}
+function updateNext(q){
+  let ok=false,answer=state.answers[q.key];
+  if(q.type==='name') ok=/^[A-Za-z][A-Za-z .'-]{1,23}$/.test(answer||'');
+  else if(q.type==='multi') ok=(answer||[]).length>=q.min;
+  else ok=Boolean(answer);
+  $('#nextBtn').disabled=!ok;
+}
+function nextStep(){
+  if($('#nextBtn').disabled) return;
+  if(state.step<questions.length-1){state.step++;save();renderQuestion();}
+  else finishSetup();
+}
+function finishSetup(){state.started=true;save();showDashboard();}
+
+function familySurname(){return `${state.answers.name || 'Alex'} 家`;}
+function profileData(){
+  const a=state.answers;
+  return [
+    ['NAME · 姓名',a.name],['GRADE · 年级','Freshman（九年级）'],['FAMILY RESOURCES · 家庭经济',labels.economy[a.economy]],['FAMILY · 家庭结构',labels.family[a.family]],['ENROLLMENT · 入学背景',labels.enrollment[a.enrollment]],['HOME ATMOSPHERE · 家庭氛围',labels.atmosphere[a.atmosphere]],['PERSONALITY · 人格',(a.personality||[]).map(x=>labels.personality[x]).join(' · ')],['INTERESTS · 兴趣',(a.interests||[]).map(x=>labels.interests[x]).join(' · ')]
+  ];
+}
+function getCourses(){
+  const a=state.answers, honors=a.workload==='high';
+  const core=[['08:00','English 9（九年级英语）','Ms. Rivera','REGULAR'],['08:55',honors?'Honors Geometry（荣誉几何）':'Geometry（几何）','Mr. Patel',honors?'HONORS':'REGULAR'],['09:50',a.subject==='stem'?'Honors Biology（荣誉生物）':'Biology（生物）','Dr. Kim',a.subject==='stem'?'HONORS':'REGULAR'],['10:45','World History（世界历史）','Ms. Brooks','REGULAR'],['12:10','Lunch（午餐）','Courtyard','FREE PERIOD'],['13:00','Physical Education（体育）','Coach Davis','REQUIRED']];
+  const elective=a.subject==='arts'?['14:00','Visual Design（视觉设计）','Mr. Bell','ELECTIVE']:a.subject==='stem'?['14:00','Intro to Engineering（工程导论）','Ms. Chen','ELECTIVE']:a.subject==='words'?['14:00','Journalism（新闻写作）','Mr. Young','ELECTIVE']:['14:00','Digital Media（数字媒体）','Ms. Stone','ELECTIVE'];
+  return [...core,elective];
+}
+function populateDashboard(){
+  const a=state.answers,name=a.name||'Alex';
+  $('#profileName').textContent=`${name} · ${familySurname()}`;
+  $('#identityList').innerHTML=profileData().map(([k,v])=>`<div><dt>${k}</dt><dd>${v||'—'}</dd></div>`).join('');
+  const enrollment=labels.enrollment[a.enrollment]||'';
+  $('#startingPoint').textContent=`Starting Point（人生起点）：作为 Cedar Ridge 的 ${enrollment}，${name} 带着 ${(a.interests||[]).map(x=>labels.interests[x]).join('、')} 这些尚未定型的兴趣走进新学期。${familySurname()}会影响日常边界，但接下来的关系与能力，都要由真实经历慢慢形成。`;
+  $('#scheduleList').innerHTML=getCourses().map((c,i)=>`<article class="course"><span class="course-time">${c[0]}</span><div><b>Period ${i+1} · ${c[1]}</b><small>${i===4?'35 分钟自由时段':'课程安排会随学期进展产生真实任务'}</small></div><span class="course-teacher">${c[2]}</span><span class="course-level">${c[3]}</span></article>`).join('');
+  $('#storyText').innerHTML=`<p>八月的空气已经有了秋季开学特有的味道：晒热的柏油路、刚割过的草坪，还有行政楼前一整排被风吹得轻轻翻页的欢迎手册。</p><p>${escapeHtml(name)} 把课表折进书包侧袋。作为 ${enrollment}，眼前的路线既有一点陌生，也带着让人跃跃欲试的空白。第一节班会还有十八分钟，你在东翼拐角遇到一个同样拿着地图的女孩。</p>`;
+}
+function dayInfo(){
+  const day=state.day||1, weekdays=['周一','周二','周三','周四','周五'];
+  return {day,label:`9 月 ${day} 日 · ${weekdays[(day-1)%5]}`,ordinal:`第 ${day} 天`};
+}
+function renderDayOpening(){
+  const {day,ordinal}=dayInfo(); if(day===1) return;
+  const name=escapeHtml(state.answers.name||'你');
+  $('#headerTitle').textContent=`${ordinal} · 早晨班会`;
+  $('.scene-tag').textContent=`DAY ${String(day).padStart(2,'0')} · 7:55 AM`;
+  $('.chapter').innerHTML=`<span>DAY ${String(day).padStart(2,'0')}</span><i></i><span>HOMEROOM</span>`;
+  $('.scene-copy h3').textContent='走廊已经不再完全陌生';
+  $('#storyText').innerHTML=`<p>${day===2?'第二次':'再次'}穿过校门时，路线已经少了几分陌生。${name} 不再需要反复查看课表，却开始注意到昨天没来得及看清的细节：公告栏上的试训日期、储物柜旁固定聊天的人，还有第一节课前短暂的安静。</p><p>Maya 已经坐在班会教室靠窗的位置，桌上摊着昨晚的 Biology（生物）练习。上课铃还有五分钟。</p>`;
+  $('#npcDialogue').classList.remove('hidden');
+  $('#npcDialogue').innerHTML='<div class="npc-head"><span class="avatar">M</span><div><b>Maya（玛雅）</b><small>Acquaintance（熟人） · 同班同学</small></div></div><p>“早。你做完 Rivera 老师留的阅读了吗？”</p><em>她抬起眼睛，给你留出了回应的空间。</em>';
+  $('#choiceRow').innerHTML='<button class="story-choice" data-action="greet"><b>坐下和 Maya 聊几句</b><span>维持联系 · 约 5 分钟</span></button><button class="story-choice" data-action="prepare"><b>先整理今天要交的作业</b><span>准备课堂 · 约 5 分钟</span></button>';
+  $('#consequence').classList.add('hidden'); $('#consequence').innerHTML='';
+}
+const storyStages = [
+  null,
+  {
+    time:'12:10 PM',chapter:'CHAPTER 02',chapterName:'LUNCH TABLE',title:'午餐桌旁的空位',header:'第一天 · 午餐时间',
+    story:['上午的课程比想象中更快。午餐铃响后，人群像被打开的潮水一样涌向中庭。长桌上散着纸袋、汽水罐和刚刚形成的小圈子，每个空位似乎都在等待某种决定。','Maya 在靠近梧桐树的位置朝你抬了抬手。她旁边还有一个戴着旧棒球帽的男生，正把薯条分给同桌。'],
+    npc:{initial:'M',name:'Maya（玛雅）',status:'Acquaintance（熟人） · 午餐中',line:'“这里还有位置。对了，这是 Noah，我们刚在 Biology（生物）课认识。”',action:'她向里面挪了挪书包，但没有替你做决定。'},
+    choices:[['join','坐到 Maya 旁边','共同午餐 · 约 35 分钟'],['quiet','先找个安静的位置','独处整理 · 约 35 分钟']]
+  },
+  {
+    time:'3:18 PM',chapter:'CHAPTER 03',chapterName:'AFTER SCHOOL',title:'铃声之后，时间属于谁',header:'第一天 · 放学后',
+    story:['最后一声铃响时，走廊里的紧绷感忽然松了下来。有人抱着球衣向体育场跑，有人在社团展板前停步，也有人已经低头查看回家的公交时刻。','你的背包里躺着两份明天要交的练习。精力还没有见底，但今天积攒的信息也需要一点时间消化。'],
+    npc:{initial:'J',name:'Jordan Lee（乔丹·李）',status:'Student Guide（学生向导） · 初次见面',line:'“社团展台五点撤。如果你只想随便看看，也不会有人逼你报名。”',action:'胸牌上写着 Student Council（学生会），语气却没有推销意味。'},
+    choices:[['clubs','去社团展台看看','探索兴趣 · 约 45 分钟'],['home','按计划回家休息','恢复精力 · 保留晚间时间']]
+  }
+];
+function renderStoryStage(stage){
+  if(stage===0) return;
+  const {day,ordinal}=dayInfo();
+  const data=storyStages[stage];
+  if(!data){
+    $('.scene-tag').textContent='DAY COMPLETE · 4:05 PM';
+    $('.chapter').innerHTML=`<span>DAY ${String(day).padStart(2,'0')}</span><i></i><span>COMPLETE</span>`;
+    $('.scene-copy h3').textContent=`${ordinal}，暂时写到这里`;
+    $('#storyText').innerHTML='<p>校园逐渐安静下来。你没有在一天里突然变成另一个人，但今天已经留下几条真实的轨迹：和谁说过话、把时间给了什么，以及哪些事情还想再看看。</p><p>进度已经保存。你可以继续进入下一天。</p>';
+    $('#npcDialogue').classList.add('hidden');
+    $('#choiceRow').innerHTML='';
+    $('#consequence').classList.remove('hidden');
+    $('#consequence').innerHTML=`<span>✓ ${ordinal}记录已完成</span><button class="continue-story" id="nextDayBtn" type="button"><span>开启新的一天</span><b>→</b></button>`;
+    $('#nextDayBtn').addEventListener('click',startNextDay);
+    $('#headerTitle').textContent=`${ordinal}结束 · 你的故事仍在继续`;
+    return;
+  }
+  $('#headerTitle').textContent=`${ordinal} · ${stage===1?'午餐时间':'放学后'}`;
+  $('.scene-tag').textContent=`DAY ${String(day).padStart(2,'0')} · ${data.time}`;
+  $('.chapter').innerHTML=`<span>${data.chapter}</span><i></i><span>${data.chapterName}</span>`;
+  $('.scene-copy h3').textContent=data.title;
+  $('#storyText').innerHTML=data.story.map(p=>`<p>${p}</p>`).join('');
+  const dialogue=$('#npcDialogue'); dialogue.classList.remove('hidden');
+  dialogue.innerHTML=`<div class="npc-head"><span class="avatar">${data.npc.initial}</span><div><b>${data.npc.name}</b><small>${data.npc.status}</small></div></div><p>${data.npc.line}</p><em>${data.npc.action}</em>`;
+  $('#choiceRow').innerHTML=data.choices.map(([value,title,meta])=>`<button class="story-choice" data-action="${value}"><b>${title}</b><span>${meta}</span></button>`).join('');
+  $('#consequence').classList.add('hidden'); $('#consequence').innerHTML='';
+}
+function showDashboard(){
+  $('#setupView').classList.add('hidden'); $('#dashboard').classList.remove('hidden');
+  const info=dayInfo(); $('#headerTitle').textContent=info.day===1?'走进 Cedar Ridge 的第一天':`${info.ordinal} · 早晨班会`; $('#dateLabel').textContent=info.label;
+  $('.day-head b').textContent=info.day===1?'开学第一天':`${info.ordinal}校园生活`; $('.day-head>span').textContent=`DAY ${info.day}`;
+  populateDashboard();
+  renderDayOpening();
+  renderStoryStage(state.storyStage||0);
+  if(state.actionTaken) showConsequence(state.lastAction || '你已经做出了今天的第一个选择。');
+}
+function takeAction(type,text){
+  const name=state.answers.name||'你';
+  const messages={together:`${name} 接过地图的一角，和 Maya 沿着东翼慢慢找过去。你们没有立刻成为朋友，但在一起走错一次楼梯后，彼此记住了对方的名字。`,solo:`${name} 向 Maya 道谢后独自离开。你提前几分钟找到礼堂，也记住了行政楼旁那条安静的小路。`,greet:`${name} 在 Maya 旁边坐下，聊了几句昨晚的阅读。对话很短，却让昨天的认识延续到了今天。`,prepare:`${name} 先摊开作业检查格式。Maya 点点头继续写自己的笔记；你们的关系没有受损，只是把这五分钟留给了不同的事情。`,join:`${name} 在 Maya 身边坐下。谈话有过短暂冷场，也有一次因为同一位老师而发出的笑声。熟悉感缓慢增加。`,quiet:`${name} 找到一张靠窗的空桌，让上午积累的声音沉淀下来。独处没有伤害任何关系，也让精力恢复了一点。`,clubs:`${name} 把四十五分钟留给了社团展台，记下几个感兴趣的名字，但没有仓促报名。`,home:`${name} 选择按时回家。你为晚间作业和休息保留了空间，这同样是一项有效安排。`};
+  showConsequence(text||messages[type]); state.actionTaken=true;state.lastAction=text||messages[type];save();
+}
+function showConsequence(text){
+  const c=$('#consequence'); c.innerHTML='';
+  const message=document.createElement('span'); message.textContent=text; c.appendChild(message);
+  const next=document.createElement('button'); next.className='continue-story'; next.type='button';
+  next.innerHTML=`<span>${(state.storyStage||0)>=2?'查看今日总结':'继续剧情'}</span><b>→</b>`;
+  next.addEventListener('click',advanceStory); c.appendChild(next); c.classList.remove('hidden');
+  $$('.story-choice').forEach(b=>b.disabled=true);
+}
+function advanceStory(){
+  state.storyStage=(state.storyStage||0)+1; state.actionTaken=false; state.lastAction=''; save();
+  renderStoryStage(state.storyStage); $('.scene-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function startNextDay(){
+  state.day=(state.day||1)+1; state.storyStage=0; state.actionTaken=false; state.lastAction=''; save();
+  showDashboard(); $('.scene-card').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function escapeHtml(s){return String(s||'').replace(/[&<>'"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[ch]));}
+
+$('#startBtn').addEventListener('click',()=>{$('#landing').classList.add('hidden');$('#app').classList.remove('hidden');state.started?showDashboard():renderQuestion();});
+$('#nextBtn').addEventListener('click',nextStep);
+$('#backBtn').addEventListener('click',()=>{if(state.step>0){state.step--;save();renderQuestion();}});
+$$('.nav-item').forEach(btn=>btn.addEventListener('click',()=>{$$('.nav-item').forEach(x=>x.classList.remove('active'));btn.classList.add('active');$$('.panel').forEach(x=>x.classList.remove('active'));$(`#panel-${btn.dataset.panel}`).classList.add('active');$('#mobileMenu').closest('.game-shell');$('.sidebar').classList.remove('open');}));
+$('#mobileMenu').addEventListener('click',()=>$('.sidebar').classList.toggle('open'));
+$('#resetBtn').addEventListener('click',()=>{if(confirm('重新开始会清除当前模拟进度，确定吗？')){localStorage.removeItem('americanHighState');location.reload();}});
+$('#choiceRow').addEventListener('click',e=>{const btn=e.target.closest('.story-choice');if(btn&&!btn.disabled)takeAction(btn.dataset.action);});
+if(state.started){$('#landing').classList.add('hidden');$('#app').classList.remove('hidden');showDashboard();}
+
+  </script>
+</body>
+</html>
+
